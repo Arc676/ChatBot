@@ -12,14 +12,23 @@ client.on('ready', () => {
 //	client.sendMessage("ChatBot has arrived!");
 });
 
+function getReply(msg){
+	switch (msg) {
+	case "ping":
+		return "pong";
+	case "chatbot":
+		return "You rang?";
+	case "chatbothelp":
+		return "Recognized commands:\n\tping\n\tchatbot\n\tchatbothelp\n\tchatbotgoaway\n\tchatbotstay"
+	case "I love you":
+		return "I know";
+	default:
+		return "";
+	}
+}
+
 client.on('message', message => {
-	if (message.content === 'ping') {
-		message.reply('pong');
-	} else if (message.content === 'chatbot') {
-		message.reply('You rang?');
-	} else if (message.content === 'chatbothelp') {
-		message.reply('Recognized commands:\n\tping\n\tchatbot\n\tchatbothelp\n\tchatbotgoaway\n\tchatbotstay\n\tfliptable');
-	} else if (message.content === 'chatbotgoaway') {
+	if (message.content === 'chatbotgoaway') {
 		if (shouldLeave) {
 			message.reply('OK :(');
 			//await sleep(1000);
@@ -32,8 +41,11 @@ client.on('message', message => {
 	} else if (message.content === 'chatbotstay') {
 		message.reply('OK I\'ll stay');
 		shouldLeave = false
-	} else if (message.content === 'fliptable') {
-		message.reply('/tableflip');
+	} else {
+		var response = getReply(message.content);
+		if (response !== "") {
+			message.reply(response);
+		}
 	}
 });
 
