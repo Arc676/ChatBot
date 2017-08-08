@@ -17,11 +17,7 @@ var callAndResponse = [
 	["This isn't your average, everyday (.+)", "This is **ADVANCED $**"]
 ];
 
-var shouldLeave = false;
-
-//function sleep(ms){
-//	return new Promise(resolve => setTimeout(resolve, ms));
-//}
+var active = true;
 
 client.on('ready', () => {
 	console.log(`I am ready! (${client.user.username})`);
@@ -29,15 +25,6 @@ client.on('ready', () => {
 });
 
 function getReply(msg){
-	
-	//Check for basic commands first (switch is supposedly faster, so leave the for-loop for later)
-	//Checks for commands (Add chatbot + commands support later)
-	switch (msg) {
-	case "chatbothelp":
-		return "Recognized commands:\n\tping\n\tchatbot\n\tchatbothelp\n\tchatbotgoaway\n\tchatbotstay\n\t(various movie quotes)"
-	default:
-		break;
-	}
 	
 	//Loop through array and get the appropriate response to the call
 	for (var i = 0; i < callAndResponse.length; i++){
@@ -56,19 +43,23 @@ function getReply(msg){
 }
 
 client.on('message', message => {
-	if (message.content === 'chatbotgoaway') { //Makes chatbot leave
-		if (shouldLeave) {
+	if (!active) {
+		if (message.content === 'chatbot come back') {
+			message.reply("I'm back");
+			active = true;
+		}
+		return;
+	}
+	if (message.content.startsWith('chatbot ')) {
+		if (message.content.endsWith(' go away')) { //Makes chatbot leave
 			message.reply('OK :(');
-			//await sleep(1000);
+			active = false
+		} else if (message.content.endsWith(' help')) {
+			message.reply("Recognized commands:\n\thelp\n\tgo away\n\tcome back\n\tdie\n\t(various movie quotes)");
+		} else if (message.content.endsWith(' die')) {
 			client.destroy();
 			process.exit(0);
-		} else {
-			message.reply('Repeat command to confirm');
-			shouldLeave = true
 		}
-	} else if (message.content === 'chatbotstay') { //Cancels leave
-		message.reply('OK I\'ll stay');
-		shouldLeave = false
 	} else { //Runs commands and performs call and response
 		var response = getReply(message.content);
 		if (response !== "") {
