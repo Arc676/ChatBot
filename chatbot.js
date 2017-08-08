@@ -1,7 +1,13 @@
 const Discord = require('discord.js');
 const client = new Discord.Client();
 
-var shouldLeave = false
+var callAndResponse = [
+	["I love you", "I know"],
+	["ping", "pong"],
+	["This is madness!", "Madness?  **THIS IS SPARTA!**"],
+];
+
+var shouldLeave = false;
 
 //function sleep(ms){
 //	return new Promise(resolve => setTimeout(resolve, ms));
@@ -13,22 +19,25 @@ client.on('ready', () => {
 });
 
 function getReply(msg){
+	
+	//Loop through array and get the appropriate response to the call
+	for (var i = 0; i < callAndResponse.length; i++){
+		if (msg == callAndResponse[i][0]){
+			return callAndResponse[i][1];
+		}	
+	}
+	
+	//Checks for commands (Add chatbot + commands support later)
 	switch (msg) {
-	case "ping":
-		return "pong";
-	case "chatbot":
-		return "You rang?";
 	case "chatbothelp":
 		return "Recognized commands:\n\tping\n\tchatbot\n\tchatbothelp\n\tchatbotgoaway\n\tchatbotstay"
-	case "I love you":
-		return "I know";
 	default:
 		return "";
 	}
 }
 
 client.on('message', message => {
-	if (message.content === 'chatbotgoaway') {
+	if (message.content === 'chatbotgoaway') { //Makes chatbot leave
 		if (shouldLeave) {
 			message.reply('OK :(');
 			//await sleep(1000);
@@ -38,10 +47,10 @@ client.on('message', message => {
 			message.reply('Repeat command to confirm');
 			shouldLeave = true
 		}
-	} else if (message.content === 'chatbotstay') {
+	} else if (message.content === 'chatbotstay') { //Cancels leave
 		message.reply('OK I\'ll stay');
 		shouldLeave = false
-	} else {
+	} else { //Runs commands and performs call and response
 		var response = getReply(message.content);
 		if (response !== "") {
 			message.reply(response);
