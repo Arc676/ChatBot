@@ -8,19 +8,21 @@ var callAndResponse = [
 	["There isn't enough road", "Where we're going, we don't need roads."],
 	["May the force be with you", "And also with you"],
 	["Is this Tony Stank\\?", "Yes, this is the Tony Stank"],
-	["[wW]here [ia][sr]e? .+\\?", "Somewhere, over the rainbow"],
-	["[wW]hat is .+", "42"],
+	["where [ia][sr]e? .+\\?", "Somewhere, over the rainbow"],
+	["what is .+", "42"],
 	["Why did the chicken cross the road\?", "To get to the other side"],
 	["LICENSE", "MIT License at https://github.com/Arc676/ChatBot"],
 	["Watcha doin\\?", "Eatin' chocolate"],
 	["Whered'ya get it\\?", "A dog dropped it!"],
-	["This isn't your average, everyday (.+)", "This is **ADVANCED $**"]
+	["This isn't your average, everyday (.+)", "This is **ADVANCED $**"],
+	["How many (\\w+)", "ALL THE $"]
 ];
 
+var name = "io"
 var active = true;
 
 client.on('ready', () => {
-	console.log(`I am ready! (${client.user.username})`);
+	console.log(`Logged in as ${client.user.username}`);
 //	client.sendMessage("ChatBot has arrived!");
 });
 
@@ -28,7 +30,7 @@ function getReply(msg){
 	
 	//Loop through array and get the appropriate response to the call
 	for (var i = 0; i < callAndResponse.length; i++){
-		var regexp = new RegExp(callAndResponse[i][0]);
+		var regexp = new RegExp(callAndResponse[i][0], 'i');
 		if (regexp.test(msg)){
 			response = callAndResponse[i][1];
 			if (callAndResponse[i][0].indexOf("(") !== -1) {
@@ -43,14 +45,17 @@ function getReply(msg){
 }
 
 client.on('message', message => {
+	if (message.author.bot) return;
 	if (!active) {
-		if (message.content === 'chatbot come back') {
+		if (message.content === 'Io come back') {
 			message.reply("I'm back");
 			active = true;
 		}
 		return;
 	}
-	if (message.content.startsWith('chatbot ')) {
+	if (message.content === name) {
+		message.reply("Hi there!");
+	} else if (message.content.startsWith(name + ", ")) {
 		if (message.content.endsWith(' go away')) { //Makes chatbot leave
 			message.reply('OK :(');
 			active = false
@@ -59,6 +64,8 @@ client.on('message', message => {
 		} else if (message.content.endsWith(' die')) {
 			client.destroy();
 			process.exit(0);
+		} else {
+			message.reply("Yes?");
 		}
 	} else { //Runs commands and performs call and response
 		var response = getReply(message.content);
