@@ -15,7 +15,8 @@ var callAndResponse = [
 	["Watcha doin\\?", "Eatin' chocolate"],
 	["Whered'ya get it\\?", "A dog dropped it!"],
 	["This isn't your average, everyday (.+)", "This is **ADVANCED $**"],
-	["How many (\\w+)", "ALL THE $"]
+	["How many (\\w+)", "ALL THE $"],
+	["thank.+\\Wio\\W|thank.+\\Wio$", "You are very welcome"]
 ];
 
 var name = "io"
