@@ -65,7 +65,7 @@ client.on('message', message => {
 		} else if (message.content.endsWith(' die')) {
 			client.destroy();
 			process.exit(0);
-		} else if (message.content.endsWith(' rtfm') {
+		} else if (message.content.endsWith(' rtfm')) {
 			message.reply("Follow your own advice: https://discord.js.org/#/docs/main/stable/general/welcome");
 		} else {
 			message.reply("Yes?");
