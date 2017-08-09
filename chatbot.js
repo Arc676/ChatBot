@@ -61,10 +61,12 @@ client.on('message', message => {
 			message.reply('OK :(');
 			active = false
 		} else if (message.content.endsWith(' help')) {
-			message.reply("Recognized commands:\n\thelp\n\tgo away\n\tcome back\n\tdie\n\t(various movie quotes)");
+			message.reply("Recognized commands:\n\thelp\n\tgo away\n\tcome back\n\tdie\n\trtfm\n\t(various movie quotes)");
 		} else if (message.content.endsWith(' die')) {
 			client.destroy();
 			process.exit(0);
+		} else if (message.content.endsWith(' rtfm') {
+			message.reply("Follow your own advice: https://discord.js.org/#/docs/main/stable/general/welcome");
 		} else {
 			message.reply("Yes?");
 		}
