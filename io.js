@@ -14,7 +14,7 @@ var callAndResponse = [
 	["LICENSE", "MIT License at https://github.com/Arc676/ChatBot"],
 	["Watcha doin\\?", "Eatin' chocolate"],
 	["Whered'ya get it\\?", "A dog dropped it!"],
-	["This isn't your average, everyday (.+)", "This is **ADVANCED $**"],
+	["This isn't your average, everyday (.+)", "This is **ADVANCED** $"],
 	["How many (\\w+)", "ALL THE $"],
 	["thank.+\\Wio\\W|thank.+\\Wio$", "You are very welcome"]
 ];

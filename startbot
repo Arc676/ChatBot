@@ -1,1 +1,7 @@
-node chatbot.js
+#!/bin/bash
+
+if [ $# -ne 1 ]; then
+	echo Usage: startbot bot_name
+	exit 1
+fi
+node $1.js
