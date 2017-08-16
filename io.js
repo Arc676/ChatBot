@@ -1,3 +1,25 @@
+//MIT License
+
+//Copyright (c) 2017 Matthew Chen, Arc676/Alessandro Vinciguerra
+
+//Permission is hereby granted, free of charge, to any person obtaining a copy
+//of this software and associated documentation files (the "Software"), to deal
+//in the Software without restriction, including without limitation the rights
+//to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+//copies of the Software, and to permit persons to whom the Software is
+//furnished to do so, subject to the following conditions:
+
+//The above copyright notice and this permission notice shall be included in all
+//copies or substantial portions of the Software.
+
+//THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+//IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+//FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+//AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+//LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+//OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+//SOFTWARE.
+
 const Discord = require('discord.js');
 const client = new Discord.Client();
 
@@ -5,7 +27,7 @@ var callAndResponse = [
 	["I love you", "I know"],
 	["ping", "pong"],
 	["This is madness!", "Madness?  **THIS IS SPARTA!**"],
-	["There isn't enough road", "Where we're going, we don't need roads."],
+	["There isn't enough (.+)", "Where we're going, we don't need $(s)."],
 	["May the force be with you", "And also with you"],
 	["Is this Tony Stank\\?", "Yes, this is the Tony Stank"],
 	["where [ia][sr]e? .+\\?", "Somewhere, over the rainbow"],
