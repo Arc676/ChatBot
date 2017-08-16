@@ -20,6 +20,7 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 
+const fs = require('fs')
 const Discord = require('discord.js')
 const client = new Discord.Client()
 
@@ -100,4 +101,4 @@ client.on('message', message => {
 	}
 })
 
-client.login('MzQ0NDMwNzk0NzYyMzU0Njg5.DGsnyA.J9vVgXAqO7YRz4rZGOyAmu9dTFE')
+client.login(fs.readFileSync(name + '.token', 'utf8'))
