@@ -34,8 +34,24 @@ client.on('ready', () => {
 	console.log(`Logged in as ${client.user.username}`)
 })
 
+function computeGuess(channel, wasHigh) {
+	if (wasHigh) {
+		guess -= delta
+	} else {
+		guess += delta
+	}
+	if (delta > 1) {
+		delta = Math.floor(delta / 2)
+	}
+	sendGuess(channel)
+}
+
+function sendGuess(channel) {
+	channel.send(opponent + ' ' + guess)
+}
+
 client.on('message', message => {
-	if (message.mentions.users.exists('username', name)) {
+	if (message.mentions.users.array().includes(client.user)) {
 		if (message.content.endsWith("die")) {
 			client.destroy()
 			process.exit(0)
@@ -53,18 +69,14 @@ client.on('message', message => {
 			}
 			guess = (high - low) / 2 + low
 			delta = guess / 2
+			sendGuess(message.channel)
 		} else if (message.content.endsWith("low")) {
-			guess += delta
-			if (delta > 1) {
-				delta /= 2
-			}
+			computeGuess(message.channel, false)
 		} else if (message.content.endsWith("high")) {
-			guess -= delta
-			if (delta > 1) {
-				delta /= 2
-			}
+			computeGuess(message.channel, true)
+		} else if (message.content.indexOf("Correct") !== -1) {
+			message.reply("Yay!")
 		}
-		else { message.reply("no command, but I recognized the mention!") }
 	}
 })
 
