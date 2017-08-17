@@ -29,15 +29,22 @@ var name = "styx"
 var opponent = {}
 var delta = {}
 var guess = {}
+var bounds = {}
 
 client.on('ready', () => {
 	console.log(`Logged in as ${client.user.username}`)
 })
 
 function computeGuess(channel, user, wasHigh) {
+	if (guess[user] >= bounds[user][1] || guess[user] <= bounds[user][0]) {
+		channel.send(opponent[user] + ", you've been giving me contradictory information")
+		return
+	}
 	if (wasHigh) {
+		bounds[user][1] = guess[user]
 		guess[user] -= delta[user]
 	} else {
+		bounds[user][0] = guess[user]
 		guess[user] += delta[user]
 	}
 	if (delta[user] > 1) {
@@ -77,7 +84,8 @@ client.on('message', message => {
 				message.channel.send(opponent[user] + " newgame " + low + " " + high)
 			}
 			guess[user] = (high - low) / 2 + low
-			delta[user] = guess[user] / 2
+			delta[user] = Math.floor(guess[user] / 2)
+			bounds[user] = [low, high]
 			sendGuess(message.channel, user)
 		} else if (user in guess) {
 			if (message.content.indexOf("low") !== -1) {
