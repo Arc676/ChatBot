@@ -26,56 +26,69 @@ const client = new Discord.Client()
 
 var name = "styx"
 
-var opponent = ""
-var delta = 0
-var guess = 0
+var opponent = {}
+var delta = {}
+var guess = {}
 
 client.on('ready', () => {
 	console.log(`Logged in as ${client.user.username}`)
 })
 
-function computeGuess(channel, wasHigh) {
+function computeGuess(channel, user, wasHigh) {
 	if (wasHigh) {
-		guess -= delta
+		guess[user] -= delta[user]
 	} else {
-		guess += delta
+		guess[user] += delta[user]
 	}
-	if (delta > 1) {
-		delta = Math.floor(delta / 2)
+	if (delta[user] > 1) {
+		delta[user] = Math.floor(delta[user] / 2)
 	}
-	sendGuess(channel)
+	sendGuess(channel, user)
 }
 
-function sendGuess(channel) {
-	channel.send(opponent + ' ' + guess)
+function sendGuess(channel, user) {
+	channel.send(opponent[user] + ' ' + guess[user])
 }
 
 client.on('message', message => {
 	if (message.mentions.users.array().includes(client.user)) {
+		var user = message.author
 		if (message.content.endsWith("die")) {
 			client.destroy()
 			process.exit(0)
-		} else if (message.content.indexOf("play") !== -1) {
+		} else if (message.content.indexOf(" play ") !== -1) {
 			var args = message.content.split(' ')
 			if (args.length < 5) {
-				message.reply("Usage: styx play username lowBound upBound [verbose]")
+				message.reply("Usage: @styx play username lowBound upBound [verbose]")
 				return
 			}
-			opponent = args[2]
+			if (user.username !== args[2]) {
+				message.guild.members.forEach(function(value, key, map){
+					if (value.user.username.toUpperCase() === args[2].toUpperCase()) {
+						user = value.user
+						return
+					}
+				})
+			}
+			opponent[user] = args[2]
 			var low = parseInt(args[3])
 			var high = parseInt(args[4])
 			if (args.length > 5 && args[5] === "verbose") {
-				message.channel.send(opponent + " newgame " + low + " " + high)
+				message.channel.send(opponent[user] + " newgame " + low + " " + high)
 			}
-			guess = (high - low) / 2 + low
-			delta = guess / 2
-			sendGuess(message.channel)
-		} else if (message.content.endsWith("low")) {
-			computeGuess(message.channel, false)
-		} else if (message.content.endsWith("high")) {
-			computeGuess(message.channel, true)
-		} else if (message.content.indexOf("Correct") !== -1) {
-			message.reply("Yay!")
+			guess[user] = (high - low) / 2 + low
+			delta[user] = guess[user] / 2
+			sendGuess(message.channel, user)
+		} else if (user in guess) {
+			if (message.content.indexOf("low") !== -1) {
+				computeGuess(message.channel, user, false)
+			} else if (message.content.indexOf("high") !== -1) {
+				computeGuess(message.channel, user, true)
+			} else if (message.content.indexOf("Correct") !== -1) {
+				message.reply("Yay!")
+				delete delta[user]
+				delete guess[user]
+			}
 		}
 	}
 })
