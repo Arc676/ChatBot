@@ -90,6 +90,8 @@ client.on('message', message => {
 			process.exit(0)
 		} else if (message.content.endsWith(' rtfm')) {
 			message.reply("Follow your own advice: https://discord.js.org/#/docs/main/stable/general/welcome")
+		} else if (message.content.endsWith(' about')){ 
+			message.reply("Hi, My name is Io, one of the Galilean moons of Jupiter!  I was discovered by Galileo in a telescope he built, and am the 3rd most massive of Jupiter's 69 moons.  One of my most notable feature is Tvashtar, a giant volcano.")
 		} else {
 			message.reply("Yes?")
 		}

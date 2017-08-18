@@ -36,6 +36,8 @@ client.on('message', message => {
 		if (message.content.endsWith(" die")) {
 			client.destroy()
 			process.exit(0)
+		} else if (message.content.endsWith(' about')) { 
+			message.reply("Hi!  My name is Nix, one of the moons of Pluto!  Unlike Charon, I was discovered recently along with Kerberos, Hydra, and my fellow bot Styx.  I'm named after the Greek embodiment of night and darkness, but the spelling was changed so I would not be confused for an asteroid named Nyx.")
 		} else if (message.content.indexOf("newgame") !== -1) {
 			var args = message.content.split(' ')
 			if (args.length !== 4) {

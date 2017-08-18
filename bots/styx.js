@@ -63,6 +63,8 @@ client.on('message', message => {
 		if (message.content.endsWith("die")) {
 			client.destroy()
 			process.exit(0)
+		} else if (message.content.endsWith(' about')) {
+			message.reply("Hi, I'm Styx!  I'm one of the smaller moons of Pluto.  I'm so small that I'm more of an oblong potato than a sphere!  I'm named after the river in the Greek underworld that made Achilles invulnerable - except for his heel of course.")
 		} else if (message.content.indexOf(" play ") !== -1) {
 			var args = message.content.split(' ')
 			if (args.length < 5) {
