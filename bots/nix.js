@@ -60,4 +60,4 @@ client.on('message', message => {
 	}
 })
 
-client.login(fs.readFileSync(name + '.token', 'utf8'))
+client.login(fs.readFileSync('tokens/' + name + '.token', 'utf8'))
