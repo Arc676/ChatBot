@@ -54,12 +54,11 @@ function printCard(message, card) {
 	var text = ""
 	for (var i = 0; i < properties.length; i++) {
 		for (var j = 0; j < properties[i].length; j++) {
-			if (properties[i][j] == undefined) {
-				break
-			}
-			text += card[properties[i][j]]
-			if (j + 1 < properties[i].length) {
-				text += "/"
+			if (properties[i][j] in card) {
+				text += card[properties[i][j]]
+				if (j + 1 < properties[i].length) {
+					text += "/"
+				}
 			}
 		}
 		text += "\n"
@@ -71,7 +70,7 @@ function getQueryProperties(query) {
 	var properties = {}
 	for (var i = 0; i < query.length; i++) {
 		const prop = query[i].split("=")
-		properties[prop[0]] = prop[1]
+		properties[prop[0]] = prop[1].replace(/-/g, ' ')
 	}
 	return properties
 }
@@ -106,6 +105,7 @@ client.on('message', message => {
 						alreadyPrinted.push(cards[i].name)
 					}
 				}
+				message.reply("End of search results. Yielded " + alreadyPrinted.length + " distinct cards")
 			})
 		}
 	}
