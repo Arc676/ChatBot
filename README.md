@@ -17,3 +17,7 @@ Styx
 - Named after one of Pluto's moons
 - Plays Number Guess with any number of players (as the guesser)
 - Can play against Nix
+
+Titania
+- Named after one of Uranus' moons
+- Searches for Magic: the Gathering cards 
