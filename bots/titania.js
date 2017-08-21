@@ -33,13 +33,47 @@ client.on('ready', () => {
 	console.log(`Logged in as ${client.user.username}`)
 })
 
+const properties = [
+	[
+		"name",
+		"manaCost"
+	],
+	[
+		"rarity",
+		"types"
+	],
+	[
+		"text"
+	],
+	[
+		"power",
+		"toughness"
+	]
+]
 function printCard(message, card) {
-//	message.reply(card.name)
-	console.log(card.name)
+	var text = ""
+	for (var i = 0; i < properties.length; i++) {
+		for (var j = 0; j < properties[i].length; j++) {
+			if (properties[i][j] == undefined) {
+				break
+			}
+			text += card[properties[i][j]]
+			if (j + 1 < properties[i].length) {
+				text += "/"
+			}
+		}
+		text += "\n"
+	}
+	message.reply(text)
 }
 
 function getQueryProperties(query) {
-	return { supertypes: 'legendary', subtypes: 'goblin' }
+	var properties = {}
+	for (var i = 0; i < query.length; i++) {
+		const prop = query[i].split("=")
+		properties[prop[0]] = prop[1]
+	}
+	return properties
 }
 
 client.on('message', message => {
@@ -50,7 +84,7 @@ client.on('message', message => {
 	const startIndex = message.content.indexOf("[[")
 	const endIndex = message.content.indexOf("]]")
 	if (startIndex !== -1 && endIndex !== -1) {
-		const query = message.content.substr(startIndex + 2, endIndex).split(" ")
+		const query = message.content.substring(startIndex + 2, endIndex).split(" ")
 		if (query.length === 0) {
 			return
 		}
@@ -72,7 +106,6 @@ client.on('message', message => {
 						alreadyPrinted.push(cards[i].name)
 					}
 				}
-				console.log(alreadyPrinted)
 			})
 		}
 	}
