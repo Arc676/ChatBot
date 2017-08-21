@@ -77,9 +77,15 @@ function getQueryProperties(query) {
 }
 
 client.on('message', message => {
-	if (message.content === name + " die") {
-		client.destroy()
-		process.exit(0)
+	if (message.content.startsWith(name + " ")) {
+		if (message.content.endsWith(" die")) {
+			client.destroy()
+			process.exit(0)
+		} else if (message.content.indexOf(" limit ") !== -1) {
+			const args = message.content.split(" ")
+			resultLimit = parseInt(args[2])
+		}
+		return
 	}
 	const startIndex = message.content.indexOf("[[")
 	const endIndex = message.content.indexOf("]]")
@@ -88,10 +94,18 @@ client.on('message', message => {
 		if (query.length === 0) {
 			return
 		}
-		if (query[0] === "set") {
+		if (message.content.startsWith("set")) {
 			//const properties = getQueryProperties(query.splice(1))
 			message.reply("Set searching coming soon!")
 		} else {
+			var printText = true
+			var printImage = false
+			if (message.content.startsWith("image")) {
+				printImage = true
+				printText = false
+			} else if (message.content.startsWith("combo")) {
+				printImage = true
+			}
 			const properties = getQueryProperties(query)
 			if (properties === undefined) {
 				message.reply("Sorry, your query failed")
@@ -106,13 +120,18 @@ client.on('message', message => {
 						found++
 					}
 				}
-				message.reply("Found " + found + " distinct cards")
+				message.reply("Found " + found + " distinct card(s)")
 				if (found > resultLimit) {
 					message.reply("Result count exceeds limit. Aborting.")
 					return
 				}
 				for (let card in distinct) {
-					printCard(message, distinct[card])
+					if (printText) {
+						printCard(message, distinct[card])
+					}
+					if (printImage) {
+						message.reply(distinct[card]['imageUrl'])
+					}
 				}
 				message.reply("End of search results")
 			})
