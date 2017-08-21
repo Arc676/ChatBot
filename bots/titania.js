@@ -28,6 +28,7 @@ const Discord = require('discord.js')
 const client = new Discord.Client()
 
 var name = "titania"
+var resultLimit = 10
 
 client.on('ready', () => {
 	console.log(`Logged in as ${client.user.username}`)
@@ -97,15 +98,23 @@ client.on('message', message => {
 				return
 			}
 			MTG.card.where(properties).then(cards => {
-				message.reply("Found " + cards.length + " cards (including duplicates)")
-				alreadyPrinted = []
+				distinct = {}
+				found = 0
 				for (var i = 0; i < cards.length; i++) {
-					if (!alreadyPrinted.includes(cards[i].name)) {
-						printCard(message, cards[i])
-						alreadyPrinted.push(cards[i].name)
+					if (!(cards[i].name in distinct)) {
+						distinct[cards[i].name] = cards[i]
+						found++
 					}
 				}
-				message.reply("End of search results. Yielded " + alreadyPrinted.length + " distinct cards")
+				message.reply("Found " + found + " distinct cards")
+				if (found > resultLimit) {
+					message.reply("Result count exceeds limit. Aborting.")
+					return
+				}
+				for (let card in distinct) {
+					printCard(message, distinct[card])
+				}
+				message.reply("End of search results")
 			})
 		}
 	}
