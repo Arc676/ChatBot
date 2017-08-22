@@ -71,7 +71,7 @@ function getQueryProperties(query) {
 	var properties = {}
 	for (var i = 0; i < query.length; i++) {
 		const prop = query[i].split("=")
-		properties[prop[0]] = prop[1].replace(/-/g, ' ')
+		properties[prop[0]] = prop[1].replace(/\+/g, ' ')
 	}
 	return properties
 }
@@ -100,7 +100,11 @@ client.on('message', message => {
 		} else {
 			var printText = true
 			var printImage = false
-			if (message.content.startsWith("image")) {
+			var debug = false
+			if (message.content.startsWith("debug")) {
+				debug = true
+				printText = false
+			} else if (message.content.startsWith("image")) {
 				printImage = true
 				printText = false
 			} else if (message.content.startsWith("combo")) {
@@ -131,6 +135,9 @@ client.on('message', message => {
 					}
 					if (printImage) {
 						message.reply(distinct[card]['imageUrl'])
+					}
+					if (debug) {
+						console.log(distinct[card])
 					}
 				}
 				message.reply("End of search results")
