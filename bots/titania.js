@@ -71,7 +71,11 @@ function getQueryProperties(query) {
 	var properties = {}
 	for (var i = 0; i < query.length; i++) {
 		const prop = query[i].split("=")
-		properties[prop[0]] = prop[1].replace(/\+/g, ' ')
+		try {
+			properties[prop[0]] = prop[1].replace(/\+/g, ' ')
+		} catch (error) {
+			return undefined;
+		}
 	}
 	return properties
 }
