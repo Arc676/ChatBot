@@ -98,57 +98,51 @@ client.on('message', message => {
 		if (query.length === 0) {
 			return
 		}
-		if (message.content.startsWith("set")) {
-			//const properties = getQueryProperties(query.splice(1))
-			message.reply("Set searching coming soon!")
-		} else {
-			var printText = true
-			var printImage = false
-			var debug = false
-			if (message.content.startsWith("debug")) {
-				debug = true
-				printText = false
-			} else if (message.content.startsWith("image")) {
-				printImage = true
-				printText = false
-			} else if (message.content.startsWith("combo")) {
-				printImage = true
+		var printText = true
+		var printImage = false
+		var debug = false
+		if (message.content.startsWith("debug")) {
+			debug = true
+			printText = false
+		} else if (message.content.startsWith("image")) {
+			printImage = true
+			printText = false
+		} else if (message.content.startsWith("combo")) {
+			printImage = true
+		}
+		const properties = getQueryProperties(query)
+		if (properties === undefined) {
+			message.reply("Sorry, your query failed")
+			return
+		}
+		MTG.card.where(properties).then(cards => {
+			distinct = {}
+			found = 0
+			for (var i = 0; i < cards.length; i++) {
+				if (!(cards[i].name in distinct)) {
+					distinct[cards[i].name] = cards[i]
+					found++
+				}
 			}
-			const properties = getQueryProperties(query)
-			if (properties === undefined) {
-				message.reply("Sorry, your query failed")
+			message.reply("Found " + found + " distinct card(s)")
+			if (found > resultLimit) {
+				message.reply("Result count exceeds limit. Aborting.")
 				return
 			}
-			MTG.card.where(properties).then(cards => {
-				distinct = {}
-				found = 0
-				for (var i = 0; i < cards.length; i++) {
-					if (!(cards[i].name in distinct)) {
-						distinct[cards[i].name] = cards[i]
-						found++
-					}
+			for (let card in distinct) {
+				if (printText) {
+					printCard(message, distinct[card])
 				}
-				message.reply("Found " + found + " distinct card(s)")
-				if (found > resultLimit) {
-					message.reply("Result count exceeds limit. Aborting.")
-					return
+				if (printImage) {
+					message.reply(distinct[card]['imageUrl'])
 				}
-				for (let card in distinct) {
-					if (printText) {
-						printCard(message, distinct[card])
-					}
-					if (printImage) {
-						message.reply(distinct[card]['imageUrl'])
-					}
-					if (debug) {
-						console.log(distinct[card])
-					}
+				if (debug) {
+					console.log(distinct[card])
 				}
-				message.reply("End of search results")
-			})
-		}
+			}
+			message.reply("End of search results")
+		})
 	}
-
 })
 
 client.login(fs.readFileSync('tokens/' + name + '.token', 'utf8'))
