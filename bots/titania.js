@@ -81,6 +81,7 @@ function getQueryProperties(query) {
 }
 
 client.on('message', message => {
+	if (message.author.bot) return
 	if (message.content.startsWith(name + " ")) {
 		if (message.content.endsWith(" die")) {
 			client.destroy()
@@ -88,6 +89,10 @@ client.on('message', message => {
 		} else if (message.content.indexOf(" limit ") !== -1) {
 			const args = message.content.split(" ")
 			resultLimit = parseInt(args[2])
+		} else if (message.content.endsWith(" help")) {
+			message.reply("Put queries in [[double brackets]]. Separate search parameters with spaces. Replace spaces within search parameters with plus signs. \
+Queries are of the form 'property=value' e.g. 'name=Arc+Lightning'. Available properties include 'name', 'cmc', 'set' (three letter abbreviation), 'type', and more. Some \
+properties cannot be searched for e.g. 'manaCost'. An example suitable search message might be [[name=bolt cmc=1 type=instant]]")
 		}
 		return
 	}
