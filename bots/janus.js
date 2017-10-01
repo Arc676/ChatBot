@@ -46,10 +46,6 @@ client.on('message', message => {
 		const args = message.content.substring(name.length + 1).split(" ")
 		try {
 			const pollname = args[1];
-			if (!(args[0] === "poll" || args[0] === "choose") && !(pollname in polls)) {
-				message.reply("No such poll")
-				return
-			}
 			if (args[0] === "poll") {
 				message.reply("Starting poll " + pollname);
 				openPolls++
@@ -59,6 +55,9 @@ client.on('message', message => {
 					votes: {}
 				}
 			} else if (args[0] === "close") {
+				if (!(pollname in polls)) {
+					message.reply("No such poll")
+				}
 				if (message.author !== polls[pollname].owner) {
 					message.reply("You cannot close someone else's poll")
 					return
@@ -87,6 +86,10 @@ client.on('message', message => {
 				delete polls[pollname]
 				message.reply(results)
 			} else if (args[0] === "vote") {
+				if (!(pollname in polls)) {
+					message.reply("No such poll")
+					return
+				}
 				if (polls[pollname].choices.includes(args[2])) {
 					polls[pollname].votes[message.author] = args[2]
 					message.reply("Thank you for casting your vote")
@@ -96,6 +99,12 @@ client.on('message', message => {
 			} else if (args[0] === "choose") {
 				const options = args.slice(1)
 				message.reply(options[Math.floor(Math.random() * options.length)])
+			} else if (args[0] === "list") {
+				list = "Polls in progress:\n"
+				for (var poll in polls) {
+					list += poll + " (" + polls[poll].choices + ")\n"
+				}
+				message.reply(list)
 			}
 		} catch (e) {
 			message.reply("Failed to parse your request")
