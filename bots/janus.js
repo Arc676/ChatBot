@@ -78,7 +78,6 @@ client.on('message', message => {
 				}
 				for (var i = 0; i < polls[pollname].choices.length; i++) {
 					const choice = polls[pollname].choices[i]
-					console.log(choice)
 					if (!(choice in voteCount)) {
 						voteCount[choice] = 0
 					}
