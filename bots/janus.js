@@ -26,6 +26,9 @@ const client = new Discord.Client()
 
 var name = "janus"
 
+var polls = {}
+var openPolls = 0
+
 client.on('ready', () => {
 	console.log(`Logged in as ${client.user.username}`)
 })
@@ -33,16 +36,72 @@ client.on('ready', () => {
 client.on('message', message => {
 	if (message.content.startsWith(name + ' ')) {
 		if (message.content.endsWith(' die')) {
+			if (openPolls > 0 && message.content.indexOf("force") === -1) {
+				message.reply("There are still polls open. Use janus force die to quit")
+				return
+			}
 			client.destroy()
 			process.exit(0)
 		}
-		var index = name.length + 1
-		const colon = message.content.indexOf(':')
-		if (colon !== -1) {
-			index = colon + 1
+		const args = message.content.substring(name.length + 1).split(" ")
+		try {
+			const pollname = args[1];
+			if (!(args[0] === "poll" || args[0] === "choose") && !(pollname in polls)) {
+				message.reply("No such poll")
+				return
+			}
+			if (args[0] === "poll") {
+				message.reply("Starting poll " + pollname);
+				openPolls++
+				polls[pollname] = {
+					owner: message.author,
+					choices: args.slice(2),
+					votes: {}
+				}
+			} else if (args[0] === "close") {
+				if (message.author !== polls[pollname].owner) {
+					message.reply("You cannot close someone else's poll")
+					return
+				}
+				var results = "Closing poll " + pollname + "\n"
+				openPolls--
+				var totalVotes = 0
+				var voteCount = {}
+				for (var voter in polls[pollname].votes) {
+					totalVotes++
+					const chosen = polls[pollname].votes[voter]
+					if (chosen in voteCount) {
+						voteCount[chosen]++
+					} else {
+						voteCount[chosen] = 1
+					}
+				}
+				for (var i = 0; i < polls[pollname].choices.length; i++) {
+					const choice = polls[pollname].choices[i]
+					console.log(choice)
+					if (!(choice in voteCount)) {
+						voteCount[choice] = 0
+					}
+					const count = voteCount[choice]
+					results += choice + ": " + count + " (" + (count * 100/ totalVotes) + "%)\n"
+				}
+				delete polls[pollname]
+				message.reply(results)
+			} else if (args[0] === "vote") {
+				if (polls[pollname].choices.includes(args[2])) {
+					polls[pollname].votes[message.author] = args[2]
+					message.reply("Thank you for casting your vote")
+				} else {
+					message.reply("Available options are: " + polls[pollname].choices)
+				}
+			} else if (args[0] === "choose") {
+				const options = args.slice(1)
+				message.reply(options[Math.floor(Math.random() * options.length)])
+			}
+		} catch (e) {
+			message.reply("Failed to parse your request")
 		}
-		const options = message.content.substring(index).split(" or ")
-		message.reply(options[Math.floor(Math.random() * options.length)])
+
 	}
 })
 
