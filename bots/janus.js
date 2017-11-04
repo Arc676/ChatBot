@@ -42,12 +42,15 @@ client.on('message', message => {
 			}
 			client.destroy()
 			process.exit(0)
+		} else if (message.content.endsWith(' help')) {
+			message.reply("Janus commands:\njanus poll PollName option1 option2 ...\njanus close PollName\njanus vote PollName choice\njanus list\njanus choose option1 option2 ...");
+			return
 		}
 		const args = message.content.substring(name.length + 1).split(" ")
 		try {
-			const pollname = args[1];
+			const pollname = args[1]
 			if (args[0] === "poll") {
-				message.reply("Starting poll " + pollname);
+				message.reply("Starting poll " + pollname)
 				openPolls++
 				polls[pollname] = {
 					owner: message.author,
