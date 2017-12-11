@@ -23,8 +23,20 @@ Titania
 - Named after one of Uranus' moons
 - Searches for Magic: the Gathering cards 
 
-(Unnamed)
+Janus
+- Named after one of Saturn's moons
 - Parses messages for options and picks a random one
+- Manages polls on which users can vote
+
+Pluto
+- Named after a dwarf planet in our solar system (as of 2006)
+- Asks random questions from the set of questions in Cards Against Humanity
+- Pairs with Charon
+
+Charon
+- Named after one of Pluto's moons
+- Answers questions with random answers from Cards Against Humanity
+- Pairs with Pluto
 
 System Requirements:
 [Node.js](http://nodejs.org)
