@@ -34,12 +34,17 @@ client.on('ready', () => {
 })
 
 function getRandomAnswer() {
-	return allAnswers[Math.floor(Math.random() * allAnswers.length)]
+	return allAnswers[Math.floor(Math.random() * allAnswers.length)].replace(/\*_/, "\\$&")
 }
 
 client.on('message', message => {
 	if (message.content.startsWith(name)) {
-		message.reply(getRandomAnswer())
+		if (message.content.endsWith("die")) {
+			client.destroy()
+			process.exit(0)
+		} else {
+			message.reply(getRandomAnswer())
+		}
 	}
 })
 
