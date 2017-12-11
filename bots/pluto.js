@@ -34,7 +34,7 @@ client.on('ready', () => {
 })
 
 function getRandomQuestion() {
-	return allQuestions[Math.floor(Math.random() * allQuestions.length)].replace(/\*_/, "\\$&")
+	return allQuestions[Math.floor(Math.random() * allQuestions.length)].replace(/[\*_]/g, "\\$&")
 }
 
 client.on('message', message => {
@@ -43,7 +43,9 @@ client.on('message', message => {
 			client.destroy()
 			process.exit(0)
 		} else {
-			message.reply(getRandomQuestion())
+			const rep = getRandomQuestion()
+			console.log(rep)
+			message.reply(rep)
 		}
 	}
 })

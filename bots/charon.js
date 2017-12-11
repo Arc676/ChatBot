@@ -34,7 +34,7 @@ client.on('ready', () => {
 })
 
 function getRandomAnswer() {
-	return allAnswers[Math.floor(Math.random() * allAnswers.length)].replace(/\*_/, "\\$&")
+	return allAnswers[Math.floor(Math.random() * allAnswers.length)].replace(/[\*_]/g, "\\$&")
 }
 
 client.on('message', message => {

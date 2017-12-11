@@ -59,6 +59,6 @@ impersonate our bots).
 
 ## Legal
 
-The bots are available under the MIT license. The text for Cards Against Humanity (in CAH/) is available
+The bots are available under the MIT license. The text for Cards Against Humanity (in `CAH/`) is available
 under [CC-BY-NC-SA 2.0](https://creativecommons.org/licenses/by-nc-sa/2.0/). See [the official website](https://www.cardsagainsthumanity.com)
 for more details.
