@@ -43,9 +43,7 @@ client.on('message', message => {
 			client.destroy()
 			process.exit(0)
 		} else {
-			const rep = getRandomQuestion()
-			console.log(rep)
-			message.reply(rep)
+			message.reply(getRandomQuestion())
 		}
 	}
 })

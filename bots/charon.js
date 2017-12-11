@@ -43,7 +43,17 @@ client.on('message', message => {
 			client.destroy()
 			process.exit(0)
 		} else {
-			message.reply(getRandomAnswer())
+			const parts = message.content.split(" ")
+			var times = 1;
+			if (parts.length > 1) {
+				const count = parseInt(parts[1])
+				if (!Number.isNaN(count)) {
+					times = count
+				}
+			}
+			for (var i = 0; i < times; i++) {
+				message.reply(getRandomAnswer())
+			}
 		}
 	}
 })
