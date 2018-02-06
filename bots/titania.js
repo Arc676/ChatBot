@@ -130,7 +130,9 @@ properties cannot be searched for e.g. 'manaCost'. An example suitable search me
 				}
 			}
 			message.reply("Found " + found + " distinct card(s)")
-			if (found > resultLimit) {
+			if (found == 0) {
+				return
+			} else if (found > resultLimit) {
 				message.reply("Result count exceeds limit. Aborting.")
 				return
 			}
