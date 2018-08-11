@@ -35,33 +35,41 @@ client.on('ready', () => {
 function evaluate(data) {
 	runningScripts++
 	let sNum = runningScripts
-	data.sFile = "script" + sNum
-	data.iFile = "input" + sNum
-	data.cmd = "./vongsprache scriptX < inputX".replace(/X/g, sNum)
+	let sFile = "script" + sNum
+	let iFile = "input" + sNum
+	let cmd = "./vongsprache scriptX < inputX".replace(/X/g, sNum)
 	runningScripts--
 
-	let fds = fs.openSync(data.sFile, "w")
+	let fds = fs.openSync(sFile, "w")
 	fs.writeSync(fds, data.script)
 	fs.close(fds)
 
-	let fdi = fs.openSync(data.iFile, "w")
+	let fdi = fs.openSync(iFile, "w")
 	fs.writeSync(fdi, data.input)
 	fs.close(fdi)
 
-	let out = cp.execSync(data.cmd)
-	return out.toString()
+	var ret = ""
+	try {
+		ret = cp.execSync(cmd).toString()
+	} catch (e) {
+		ret = e.status + ": " + e.stderr.toString()
+	}
+	fs.unlink(sFile)
+	fs.unlink(iFile)
+	return ret
 }
 
 client.on('message', message => {
 	if (message.author.bot) return
-	if (message.content.startsWith(name + ' ')) {
+	if (message.content.startsWith(name)) {
 		if (message.content.endsWith(' die')) {
 			client.destroy()
 			process.exit(0)
 		} else {
 			var data = {}
-			data.script = "bidde drucke mit (\"Hallo, Welt!\")"
-			data.input = ""
+			let blocks = message.content.split(/```/)
+			data.script = blocks[1].trim()
+			data.input = blocks[3].trim() + "\n"
 			let resp = evaluate(data)
 			message.reply(resp)
 		}
