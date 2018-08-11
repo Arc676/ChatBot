@@ -1,4 +1,4 @@
-# ChatBot
+# Discord Bots
 
 This repository contains the source files for some Discord bots. The source
 code is available under the MIT License, copyright Matthew Chen and Arc676/Alessandro Vinciguerra.
@@ -37,6 +37,10 @@ Charon
 - Named after one of Pluto's moons
 - Answers questions with random answers from Cards Against Humanity
 - Pairs with Pluto
+
+Deimos
+- Reads [Vongsprache](https://github.com/Arc676/Vongsprache) scripts, evaluates them, and replies with the output
+- Requires a `vongsprache` executable in the project root
 
 System Requirements:
 [Node.js](http://nodejs.org)
