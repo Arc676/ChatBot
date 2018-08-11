@@ -66,12 +66,16 @@ client.on('message', message => {
 			client.destroy()
 			process.exit(0)
 		} else {
-			var data = {}
-			let blocks = message.content.split(/```/)
-			data.script = blocks[1].trim()
-			data.input = blocks[3].trim() + "\n"
-			let resp = evaluate(data)
-			message.reply(resp)
+			try {
+				var data = {}
+				let blocks = message.content.split(/```/)
+				data.script = blocks[1].trim()
+				data.input = blocks[3].trim() + "\n"
+				let resp = evaluate(data)
+				message.reply(resp)
+			} catch (e) {
+				message.reply("Malformed request")
+			}
 		}
 	}
 })

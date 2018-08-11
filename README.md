@@ -1,7 +1,6 @@
 # Discord Bots
 
-This repository contains the source files for some Discord bots. The source
-code is available under the MIT License, copyright Matthew Chen and Arc676/Alessandro Vinciguerra.
+This repository contains the source files for some Discord bots. The source code is available under the MIT License, copyright Matthew Chen and Arc676/Alessandro Vinciguerra.
 
 Io
 - Named after one of Jupiter's moons
@@ -41,6 +40,7 @@ Charon
 Deimos
 - Reads [Vongsprache](https://github.com/Arc676/Vongsprache) scripts, evaluates them, and replies with the output
 - Requires a `vongsprache` executable in the project root
+- Requests should contain two code blocks, the first of which contains the script and the second of which contains any user input to be passed to the script
 
 System Requirements:
 [Node.js](http://nodejs.org)
@@ -57,12 +57,8 @@ The script will run `node` with the specified script in the background.
 
 The bots folder contains the bot scripts.
 
-The tokens folder contains files named `botname.token` containing the secret token of the app with
-**NO TRAILING NEWLINE**. These tokens are not included in this repository (because then you could
-impersonate our bots).
+The tokens folder contains files named `botname.token` containing the secret token of the app with **NO TRAILING NEWLINE**. These tokens are not included in this repository (because then you could impersonate our bots).
 
 ## Legal
 
-The bots are available under the MIT license. The text for Cards Against Humanity (in `CAH/`) is available
-under [CC-BY-NC-SA 2.0](https://creativecommons.org/licenses/by-nc-sa/2.0/). See [the official website](https://www.cardsagainsthumanity.com)
-for more details.
+The bots are available under the MIT license. The text for Cards Against Humanity (in `CAH/`) is available under [CC-BY-NC-SA 2.0](https://creativecommons.org/licenses/by-nc-sa/2.0/). See [the official website](https://www.cardsagainsthumanity.com) for more details.
