@@ -52,7 +52,7 @@ function evaluate(data) {
 	try {
 		ret = cp.execSync(cmd).toString()
 	} catch (e) {
-		ret = e.status + ": " + e.stderr.toString()
+		ret = "Err " + e.status + ": " + e.stderr.toString()
 	}
 	fs.unlink(sFile)
 	fs.unlink(iFile)
@@ -65,6 +65,8 @@ client.on('message', message => {
 		if (message.content.endsWith(' die')) {
 			client.destroy()
 			process.exit(0)
+		} else if (message.content.endsWith(' help')) {
+			message.reply("To run a script, the message must start with \"deimos\" and contain two code blocks with no language. The first code block contains the script and the second is passed to `stdin`.")
 		} else {
 			try {
 				var data = {}
@@ -72,7 +74,7 @@ client.on('message', message => {
 				data.script = blocks[1].trim()
 				data.input = blocks[3].trim() + "\n"
 				let resp = evaluate(data)
-				message.reply(resp)
+				message.reply("```" + resp + "```")
 			} catch (e) {
 				message.reply("Malformed request")
 			}

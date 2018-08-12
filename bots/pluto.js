@@ -1,6 +1,6 @@
 //MIT License
 
-//Copyright (c) 2017 Arc676/Alessandro Vinciguerra
+//Copyright (c) 2017-8 Arc676/Alessandro Vinciguerra
 
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files (the "Software"), to deal
