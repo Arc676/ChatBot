@@ -6,5 +6,5 @@ if [ $# -lt 1 ]; then
 fi
 for bot in "$@"; do
 	echo Waking $bot
-	node bots/$bot.js &
+	python3 bots/$bot.py &
 done

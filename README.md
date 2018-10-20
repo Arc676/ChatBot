@@ -43,7 +43,7 @@ Deimos
 - Requests should contain two code blocks, the first of which contains the script and the second of which contains any user input to be passed to the script
 
 System Requirements:
-[Node.js](http://nodejs.org)
+Python 3.4 or later. See the requirements for [the Discord API](https://github.com/Rapptz/discord.py) for more details.
 
 ## Instructions for running:
 The directory containing the bots must look like this (assuming you don't modify the scripts).
@@ -53,7 +53,7 @@ The directory containing the bots must look like this (assuming you don't modify
 |-tokens
 ```
 Use the `startbot` script to run the bots *while you are in the directory* i.e. `./startbot botname`.
-The script will run `node` with the specified script in the background.
+The script will run `python3` with the specified script in the background.
 
 The bots folder contains the bot scripts.
 
