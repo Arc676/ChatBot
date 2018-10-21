@@ -42,8 +42,8 @@ Deimos
 - Requires a `vongsprache` executable in the project root
 - Requests should contain two code blocks, the first of which contains the script and the second of which contains any user input to be passed to the script
 
-System Requirements:
-Python 3.4 or later. See the requirements for [the Discord API](https://github.com/Rapptz/discord.py) for more details.
+## System Requirements:
+Python 3.4 or later. See the requirements for [the Discord API](https://github.com/Rapptz/discord.py) and the [MTG SDK](https://github.com/MagicTheGathering/mtg-sdk-python) for more details on required Python packages.
 
 ## Instructions for running:
 The directory containing the bots must look like this (assuming you don't modify the scripts).
