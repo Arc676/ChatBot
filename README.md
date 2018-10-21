@@ -62,3 +62,5 @@ The tokens folder contains files named `botname.token` containing the secret tok
 ## Legal
 
 The bots are available under the MIT license. The text for Cards Against Humanity (in `CAH/`) is available under [CC-BY-NC-SA 2.0](https://creativecommons.org/licenses/by-nc-sa/2.0/). See [the official website](https://www.cardsagainsthumanity.com) for more details.
+
+The images of the celestial bodies come from Wikipedia. All images are in the public domain as they were created by NASA.
