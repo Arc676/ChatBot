@@ -38,9 +38,19 @@ Charon
 - Pairs with Pluto
 
 Deimos
+- Named after one of Mars' moons
 - Reads [Vongsprache](https://github.com/Arc676/Vongsprache) scripts, evaluates them, and replies with the output
 - Requires a `vongsprache` executable in the project root
 - Requests should contain two code blocks, the first of which contains the script and the second of which contains any user input to be passed to the script
+
+Prometheus
+- Named after an inner satellite of Saturn
+- Generates calendar "facts" from the xkcd comic 1930
+
+Titan
+- Control bot
+- Can start other bots and and run `git pull` to update the local scripts if a bot needs to be updated
+- Named after Saturn's biggest moon
 
 ## System Requirements:
 Python 3.4 or later. See the requirements for [the Discord API](https://github.com/Rapptz/discord.py) and the [MTG SDK](https://github.com/MagicTheGathering/mtg-sdk-python) for more details on required Python packages.
