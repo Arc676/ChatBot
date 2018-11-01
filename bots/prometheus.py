@@ -27,11 +27,8 @@ import asyncio
 class Prometheus(CelestialBot):
 	def __init__(self):
 		super().__init__("Prometheus")
+		self.defaultCmd = self.printInfo
 		self.commands.update({
-			"about" : self.printInfo,
-			"1228" : self.printInfo,
-			"1930" : self.printInfo,
-			"help" : self.printInfo,
 			"fact" : self.replyWithFact
 		})
 

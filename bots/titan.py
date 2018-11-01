@@ -20,73 +20,60 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import discord
+from bot import CelestialBot
 import asyncio
 import subprocess
 import re
 from pathlib import Path
 
-client = discord.Client()
+class Titan(CelestialBot):
+	def __init__(self):
+		super().__init__("Titan")
+		self.procs = {}
+		self.defaultCmd = self.handle
 
-name = "titan"
-procs = {}
-
-@client.event
-@asyncio.coroutine
-def on_ready():
-	print("Logged in as " + client.user.name)
-
-def update():
-	ret = subprocess.check_output("git pull -q".split(" ")).decode("utf-8")
-
-	if ret == "":
-		return "Was already up to date"
-	else:
-		return "Updated repository"
-
-def startBot(botname):
-	global procs
-	if botname in procs:
-		return "{0} already running. Use `poll` to see if it died.".format(botname)
-	p = subprocess.Popen(["./startbot", botname])
-	procs[botname] = p
-	return "Started {0}".format(botname)
-
-def pollProcs():
-	global procs
-	i = 0
-	bots = list(procs.keys())
-	for bot in bots:
-		if procs[bot].poll is not None:
-			del procs[bot]
-		else:
-			i += 1
-@client.event
-@asyncio.coroutine
-def on_message(message):
-	if message.author.bot or len([role for role in message.author.roles if str(role) == "Bot Control"]) == 0:
-		return
-	if message.content.startswith(name):
-		args = message.content.split(" ")
-		if len(args) < 2:
+	@asyncio.coroutine
+	def handle(self, message, args):
+		if "Bot Control" not in [str(role) for role in message.author.roles]:
 			return
-		if args[1] == "die":
-			yield from client.logout()
-		elif args[1] == "help":
-			yield from client.send_message(message.channel, "Available commands: update, start bot_name [bot_name ...], poll, die")
+		if args[1] == "help":
+			yield from self.send_message(message.channel, "Available commands: update, start bot_name [bot_name ...], poll, die")
 		elif args[1] == "update":
-			yield from client.send_message(message.channel, update())
+			yield from self.send_message(message.channel, self.update())
 		elif args[1] == "start":
 			for bot in args[2:]:
 				if re.search("[^a-zA-Z]", bot):
-					yield from client.send_message(message.channel, "Illegal bot name")
+					yield from self.send_message(message.channel, "Illegal bot name")
 				else:
-					yield from client.send_message(message.channel, startBot(bot))
+					yield from self.send_message(message.channel, self.startBot(bot))
 		elif args[1] == "poll":
-			pollProcs()
-			yield from client.send_message(message.channel, "Done")
+			self.pollProcs()
+			yield from self.send_message(message.channel, "Done")
 
-file = open("tokens/" + name + ".token", "r")
-token = file.read()
-file.close()
-client.run(token)
+	def update(self):
+		ret = subprocess.check_output("git pull -q".split(" ")).decode("utf-8")
+
+		if ret == "":
+			return "Was already up to date"
+		else:
+			return "Updated repository"
+
+	def startBot(self, botname):
+		if botname in self.procs:
+			return "{0} already running. Use `poll` to see if it died.".format(botname)
+		p = subprocess.Popen(["./startbot", botname])
+		self.procs[botname] = p
+		return "Started {0}".format(botname)
+
+	def pollProcs(self):
+		i = 0
+		bots = list(self.procs.keys())
+		for bot in bots:
+			if self.procs[bot].poll is not None:
+				del self.procs[bot]
+			else:
+				i += 1
+
+if __name__ == "__main__":
+	bot = Titan()
+	bot.run(bot.getToken())
