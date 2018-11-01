@@ -20,58 +20,45 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import discord
+from bot import CelestialBot
 import asyncio
 from random import randint
 
-client = discord.Client()
+class Nix(CelestialBot):
+	def __init__(self):
+		super().__init__("Nix")
+		self.answers = {}
+		self.allowBotControl = True
+		self.defaultCmd = self.handle
 
-name = "nix"
-answers = {}
-
-@client.event
-@asyncio.coroutine
-def on_ready():
-	print("Logged in as " + client.user.name)
-
-@asyncio.coroutine
-def replyToMsg(msgObj, msg):
-	global client
-	yield from client.send_message(msgObj.channel, "{0} {1}".format(msgObj.author.mention, msg))
-
-@client.event
-@asyncio.coroutine
-def on_message(message):
-	if message.content.startswith(name + " "):
-		if message.content.endswith(" die"):
-			yield from client.logout()
-		elif message.content.endswith(" about"): 
-			yield from replyToMsg(message, "Hi! My name is Nix, one of the moons of Pluto! Unlike Charon, I was discovered recently along with Kerberos, Hydra, and my fellow bot Styx. I'm named after the Greek embodiment of night and darkness, but the spelling was changed so I would not be confused for an asteroid named Nyx.")
-		elif "newgame" in message.content:
-			args = message.content.split(" ")
+	@asyncio.coroutine
+	def handle(self, message, args):
+		if message.content.endswith(" about"): 
+			yield from self.replyToMsg(message, "Hi! My name is Nix, one of the moons of Pluto! Unlike Charon, I was discovered recently along with Kerberos, Hydra, and my fellow bot Styx. I'm named after the Greek embodiment of night and darkness, but the spelling was changed so I would not be confused for an asteroid named Nyx.")
+		elif "newgame" in args:
 			if len(args) != 4:
-				yield from replyToMsg(message, "Usage: nix newgame lowBound upBound")
+				yield from self.replyToMsg(message, "Usage: nix newgame lowBound upBound")
+				return
 			try:
 				lowerBound = int(args[2])
 				upperBound = int(args[3])
-				answers[message.author] = randint(lowerBound, upperBound)
-				yield from replyToMsg(message, "Alright, let's play!")
+				self.answers[message.author] = randint(lowerBound, upperBound)
+				yield from self.replyToMsg(message, "Alright, let's play!")
 			except ValueError:
-				yield from replyToMsg(message, "Failed to parse arguments")
-		elif message.author in answers:
+				yield from self.replyToMsg(message, "Failed to parse arguments")
+		elif message.author in self.answers:
 			try:
-				guess = int(message.content[len(name) + 1:])
-				if guess == answers[message.author]:
-					del answers[message.author]
-					yield from replyToMsg(message, "Correct!")
-				elif guess < answers[message.author]:
-					yield from replyToMsg(message, "Too low!")
+				guess = int(args[1])
+				if guess == self.answers[message.author]:
+					del self.answers[message.author]
+					yield from self.replyToMsg(message, "Correct")
+				elif guess < self.answers[message.author]:
+					yield from self.replyToMsg(message, "Too low")
 				else:
-					yield from replyToMsg(message, "Too high!")
+					yield from self.replyToMsg(message, "Too high")
 			except ValueError:
-				yield from replyToMsg(message, "Failed to parse guess")
+				yield from self.replyToMsg(message, "Failed to parse guess")
 
-file = open("tokens/" + name + ".token", "r")
-token = file.read()
-file.close()
-client.run(token)
+if __name__ == "__main__":
+	bot = Nix()
+	bot.run(bot.getToken())
