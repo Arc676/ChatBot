@@ -20,44 +20,27 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import discord
+from bot import CelestialBot
 import asyncio
 import re
 from random import randint
 
-client = discord.Client()
+class Pluto(CelestialBot):
+	def __init__(self):
+		super().__init__("Pluto")
+		file = open("CAH/questions.txt", "r")
+		self.allQuestions = file.readlines()
+		file.close()
+		self.qCount = len(self.allQuestions) - 1
+		self.defaultCmd = self.getQ
 
-name = "pluto"
+	@asyncio.coroutine
+	def getQ(self, message, args):
+		yield from self.send_message(message.channel, "{0} {1}".format(message.author.mention, self.getRandomQuestion()))
 
-allQuestions = []
-qCount = 0
+	def getRandomQuestion(self):
+		return re.sub("([\*_])", r"\\\1", self.allQuestions[randint(0, self.qCount)])
 
-@client.event
-@asyncio.coroutine
-def on_ready():
-	global qCount
-	global allQuestions
-	print("Logged in as " + client.user.name)
-	file = open("CAH/questions.txt", "r")
-	allQuestions = file.readlines()
-	file.close()
-	qCount = len(allQuestions) - 1
-
-def getRandomQuestion():
-	global qCount
-	global allQuestions
-	return re.sub("([\*_])", r"\\\1", allQuestions[randint(0, qCount)])
-
-@client.event
-@asyncio.coroutine
-def on_message(message):
-	if message.content.startswith(name):
-		if message.content.endswith("die"):
-			yield from client.logout()
-		else:
-			yield from client.send_message(message.channel, "{0} {1}".format(message.author.mention, getRandomQuestion()))
-
-file = open("tokens/" + name + ".token", "r")
-token = file.read()
-file.close()
-client.run(token)
+if __name__ == "__main__":
+	bot = Pluto()
+	bot.run(bot.getToken())
