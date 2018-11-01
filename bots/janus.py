@@ -20,98 +20,104 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import discord
+from bot import CelestialBot
 import asyncio
 from random import randint
 
-client = discord.Client()
+class Janus(CelestialBot):
+	def __init__(self):
+		super().__init__("Janus")
+		self.polls = {}
+		self.openPolls = 0
+		self.commands.update({
+			"help" : self.getHelp,
+			"poll" : self.newPoll,
+			"close" : self.closePoll,
+			"vote" : self.voteOnPoll,
+			"list" : self.listPolls,
+			"choose" : self.chooseFromList
+		})
 
-name = "janus"
+	@asyncio.coroutine
+	def getHelp(self, message, args):
+		yield from self.replyToMsg(message, "Janus commands:\njanus poll PollName option1 option2 [option3 ...]\njanus close PollName\njanus vote PollName choice\njanus list\njanus choose option1 option2 [option3 ...]")
 
-polls = {}
-openPolls = 0
-
-@client.event
-@asyncio.coroutine
-def on_ready():
-	print("Logged in as " + client.user.name)
-
-@asyncio.coroutine
-def replyToMsg(msgObj, msg):
-	global client
-	yield from client.send_message(msgObj.channel, "{0} {1}".format(msgObj.author.mention, msg))
-
-@client.event
-@asyncio.coroutine
-def on_message(message):
-	global polls
-	global openPolls
-	if message.content.startswith(name + " "):
-		if message.content.endswith(" die"):
-			if openPolls > 0 and "force" not in message.content:
-				yield from replyToMsg(message, "There are still polls open. Use janus force die to quit")
-			yield from client.logout()
-		elif message.content.endswith(" help"):
-			yield from replyToMsg(message, "Janus commands:\njanus poll PollName option1 option2 ...\njanus close PollName\njanus vote PollName choice\njanus list\njanus choose option1 option2 ...");
-		if client.is_closed:
+	@asyncio.coroutine
+	def newPoll(self, message, args):
+		if len(args) < 4:
+			yield from self.replyToMsg("Invalid request")
 			return
-		args = message.content[len(name) + 1:].split(" ")
-		try:
-			pollname = ""
-			if len(args) > 1:
-				pollname = args[1]
-			if args[0] == "poll":
-				openPolls += 1
-				polls[pollname] = {
-					"owner": message.author,
-					"choices": args[2:],
-					"votes": {}
-				}
-				yield from replyToMsg(message, "Starting poll " + pollname)
-			elif args[0] == "close":
-				if pollname not in polls:
-					yield from replyToMsg(message, "No such poll")
-				if message.author != polls[pollname]["owner"]:
-					yield from replyToMsg(message, "You cannot close someone else's poll")
-				results = "Closing poll " + pollname + "\n"
-				openPolls -= 1
-				totalVotes = 0
-				voteCount = {}
-				for voter in polls[pollname]["votes"]:
-					totalVotes += 1
-					chosen = polls[pollname]["votes"][voter]
-					if chosen in voteCount:
-						voteCount[chosen] += 1
-					else:
-						voteCount[chosen] = 1
-				for choice in polls[pollname]["choices"]:
-					if choice not in voteCount:
-						voteCount[choice] = 0
-					count = voteCount[choice]
-					results += "{0}: {1} ({2}%)\n".format(choice, count, count * 100 // totalVotes)
-				del polls[pollname]
-				yield from replyToMsg(message, results)
-			elif args[0] == "vote":
-				if pollname not in polls:
-					yield from replyToMsg(message, "No such poll")
-				if args[2] in polls[pollname]["choices"]:
-					polls[pollname]["votes"][message.author] = args[2]
-					yield from replyToMsg(message, "Thank you for casting your vote")
-				else:
-					yield from replyToMsg(message, "Available options are: {0}".format(str(polls[pollname]["choices"])))
-			elif args[0] == "choose":
-				options = args[1:]
-				yield from replyToMsg(message, options[randint(0, len(options) - 1)])
-			elif args[0] == "list":
-				list = "Polls in progress:\n"
-				for poll in polls:
-					list += "{0} ({2})\n".format(poll, polls["choices"])
-				yield from replyToMsg(message, list)
-		except Exception as e:
-			print(e)
-			yield from replyToMsg(message, "Failed to parse your request")
+		pollname = args[2]
+		self.openPolls += 1
+		self.polls[pollname] = {
+			"owner": message.author,
+			"choices": args[3:],
+			"votes": {}
+		}
+		yield from self.replyToMsg(message, "Starting poll " + pollname)
 
-file = open("tokens/" + name + ".token", "r")
-token = file.read()
-file.close()
-client.run(token)
+	@asyncio.coroutine
+	def closePoll(self, message, args):
+		if len(args) < 3:
+			yield from self.replyToMsg(message, "Invalid request")
+			return
+		pollname = args[2]
+		if pollname not in self.polls:
+			yield from replyToMsg(message, "No such poll")
+			return
+		if message.author != self.polls[pollname]["owner"]:
+			yield from self.replyToMsg(message, "You cannot close someone else's poll")
+			return
+		results = "Closing poll " + pollname + "\n"
+		self.openPolls -= 1
+		totalVotes = 0
+		voteCount = {}
+		for _, chosen in self.polls[pollname]["votes"].items():
+			totalVotes += 1
+			if chosen in voteCount:
+				voteCount[chosen] += 1
+			else:
+				voteCount[chosen] = 1
+		if totalVotes == 0:
+			results += "Nobody voted"
+		else:
+			for choice in self.polls[pollname]["choices"]:
+				if choice not in voteCount:
+					voteCount[choice] = 0
+				count = voteCount[choice]
+				results += "{0}: {1} ({2}%)\n".format(choice, count, count * 100 // totalVotes)
+		del self.polls[pollname]
+		yield from self.replyToMsg(message, results)
+
+	@asyncio.coroutine
+	def voteOnPoll(self, message, args):
+		if len(args) < 4:
+			yield from self.replyToMsg(message, "Invalid vote")
+			return
+		pollname = args[2]
+		if pollname not in self.polls:
+			yield from self.replyToMsg(message, "No such poll")
+		if args[3] in self.polls[pollname]["choices"]:
+			self.polls[pollname]["votes"][message.author] = args[3]
+			yield from self.replyToMsg(message, "Thank you for casting your vote")
+		else:
+			yield from self.replyToMsg(message, "Available options are: {0}".format(str(self.polls[pollname]["choices"])))
+
+	@asyncio.coroutine
+	def chooseFromList(self, message, args):
+		if len(args) < 4:
+			yield from self.replyToMsg(message, "Need at least 2 items to choose from")
+			return
+		options = args[2:]
+		yield from self.replyToMsg(message, options[randint(0, len(options) - 1)])
+
+	@asyncio.coroutine
+	def listPolls(self, message, args):
+		list = "Polls in progress:\n"
+		for pollname, poll in self.polls.items():
+			list += "{0} ({1})\n".format(pollname, poll["choices"])
+		yield from self.replyToMsg(message, list)
+
+if __name__ == "__main__":
+	bot = Janus()
+	bot.run(bot.getToken())
