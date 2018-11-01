@@ -44,7 +44,11 @@ class CelestialBot(discord.Client):
 
 	@asyncio.coroutine
 	def killBot(self, message, args):
-		yield from self.logout()
+		if not self.handleEverything or self.wasAddressed(message):
+			yield from self.logout()
+
+	def wasAddressed(self, message):
+		return message.content.lower().startswith(self.name.lower() + " ") or self.user in message.mentions
 
 	def getToken(self):
 		file = open("tokens/" + self.name + ".token", "r")
@@ -64,9 +68,11 @@ class CelestialBot(discord.Client):
 	def on_message(self, message):
 		if message.author.bot and not self.allowBotControl:
 			return
-		if message.content.lower().startswith(self.name.lower()) or self.user in message.mentions or self.handleEverything:
-			args = message.content.split(" ")
+		args = message.content.split(" ")
+		if self.wasAddressed(message):
 			if len(args) >= 2 and args[1] in self.commands:
 				yield from self.commands[args[1]](message, args)
 			elif self.defaultCmd is not None:
 				yield from self.defaultCmd(message, args)
+		elif self.handleEverything and self.defaultCmd is not None:
+			yield from self.defaultCmd(message, args)

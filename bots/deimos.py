@@ -20,73 +20,59 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import discord
+from bot import CelestialBot
 import asyncio
 import subprocess
 from pathlib import Path
 
-client = discord.Client()
+class Deimos(CelestialBot):
+	def __init__(self):
+		super().__init__("Deimos")
+		self.runningScripts = 0
+		self.defaultCmd = self.handle
 
-name = "deimos"
-runningScripts = 0
-
-@client.event
-@asyncio.coroutine
-def on_ready():
-	print("Logged in as " + client.user.name)
-
-def evaluate(data):
-	global runningScripts
-	runningScripts += 1
-	sNum = runningScripts
-	sFile = "script{0}".format(sNum)
-	iFile = "input{0}".format(sNum)
-	runningScripts -= 1
-
-	fds = open(sFile, "w")
-	fds.write(data["script"])
-	fds.close()
-
-	fdi = open(iFile, "w")
-	fdi.write(data["input"])
-	fdi.close()
-
-	ret = ""
-	try:
-		fdi = open(iFile, "r")
-		ret = subprocess.check_output(["./vongsprache", sFile], stdin=fdi)
-	except subprocess.CalledProcessError as e:
-		ret = "Err {0}: {1}".format(e.returncode, e.output)
-	finally:
-		fdi.close()
-
-	Path(sFile).unlink()
-	Path(iFile).unlink()
-	return ret
-
-@client.event
-@asyncio.coroutine
-def on_message(message):
-	if message.author.bot:
-		return
-	if message.content.startswith(name):
-		if message.content.endswith(" die"):
-			yield from client.logout()
-		elif message.content.endswith(" help"):
-			yield from client.send_message(message.channel, "To run a script, the message must start with \"deimos\" and contain two code blocks with no language. The first code block contains the script and the second is passed to `stdin`.")
+	@asyncio.coroutine
+	def handle(self, message, args):
+		if args[1] == "help":
+			yield from self.send_message(message.channel, "To run a script, the message must start with \"deimos\" and contain two code blocks with no language. The first code block contains the script and the second is passed to `stdin`.")
 		else:
 			try:
 				data = {}
 				blocks = message.content.split("```")
 				data["script"] = blocks[1].strip()
 				data["input"] = blocks[3].strip() + "\n"
-				resp = evaluate(data)
-				yield from client.send_message(message.channel, "```{0}```".format(resp.decode("utf-8")))
-			except Exception as e:
-				print(e)
-				yield from client.send_message(message.channel, "Malformed request")
+				resp = self.evaluate(data)
+				yield from self.send_message(message.channel, "```{0}```".format(resp.decode("utf-8")))
+			except:
+				yield from self.send_message(message.channel, "Malformed request")
 
-file = open("tokens/" + name + ".token", "r")
-token = file.read()
-file.close()
-client.run(token)
+	def evaluate(self, data):
+		self.runningScripts += 1
+		sNum = self.runningScripts
+		sFile = "script{0}".format(sNum)
+		iFile = "input{0}".format(sNum)
+
+		fds = open(sFile, "w")
+		fds.write(data["script"])
+		fds.close()
+
+		fdi = open(iFile, "w")
+		fdi.write(data["input"])
+		fdi.close()
+
+		ret = ""
+		try:
+			fdi = open(iFile, "r")
+			ret = subprocess.check_output(["./vongsprache", sFile], stdin=fdi)
+		except subprocess.CalledProcessError as e:
+			ret = "Err {0}: {1}".format(e.returncode, e.output)
+		finally:
+			fdi.close()
+
+		Path(sFile).unlink()
+		Path(iFile).unlink()
+		return ret
+
+if __name__ == "__main__":
+	bot = Deimos()
+	bot.run(bot.getToken())

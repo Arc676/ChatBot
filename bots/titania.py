@@ -20,136 +20,123 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import discord
+from bot import CelestialBot
 import asyncio
 from mtgsdk import Card
 
-client = discord.Client()
-
-name = "titania"
-resultLimit = 10
-
-@client.event
-@asyncio.coroutine
-def on_ready():
-	print("Logged in as " + client.user.name)
-
-properties = [
-	[
-		"name",
-		"mana_cost"
-	],
-	[
-		"rarity",
-		"types"
-	],
-	[
-		"text"
-	],
-	[
-		"power",
-		"toughness"
+class Titania(CelestialBot):
+	properties = [
+		[
+			"name",
+			"mana_cost"
+		],
+		[
+			"rarity",
+			"types"
+		],
+		[
+			"text"
+		],
+		[
+			"power",
+			"toughness"
+		]
 	]
-]
 
-@asyncio.coroutine
-def replyToMsg(msgObj, msg):
-	global client
-	yield from client.send_message(msgObj.channel, "{0} {1}".format(msgObj.author.mention, msg))
+	def __init__(self):
+		super().__init__("Titania")
+		self.resultLimit = 10
+		self.handleEverything = True
+		self.defaultCmd = self.search
+		self.commands.update({
+			"help" : self.getHelp,
+			"limit" : self.setLimit
+		})
 
-@asyncio.coroutine
-def printCard(message, card):
-	global properties
-	text = ""
-	for group in properties:
-		j = 0
-		for prop in group:
-			if prop in card.__dict__:
-				text += str(card.__dict__[prop])
-				if j + 1 < len(group):
-					text += "/"
-				j += 1
-		text += "\n"
-	yield from replyToMsg(message, text)
+	@asyncio.coroutine
+	def printCard(self, message, card):
+		text = ""
+		for group in self.properties:
+			j = 0
+			for prop in group:
+				if prop in card.__dict__:
+					text += str(card.__dict__[prop])
+					if j + 1 < len(group):
+						text += "/"
+					j += 1
+			text += "\n"
+		yield from self.replyToMsg(message, text)
 
-def getQueryProperties(query):
-	properties = {}
-	for param in query:
-		prop = param.split("=")
-		try:
-			properties[prop[0]] = prop[1].replace("+", " ")
-		except:
-			return None
-	return properties
+	def getQueryProperties(self, query):
+		properties = {}
+		for param in query:
+			prop = param.split("=")
+			try:
+				properties[prop[0]] = prop[1].replace("+", " ")
+			except:
+				return None
+		return properties
 
-@client.event
-@asyncio.coroutine
-def on_message(message):
-	global name
-	global resultLimit
-	if message.author.bot:
-		return
-	if message.content.startswith(name + " "):
-		if message.content.endswith(" die"):
-			yield from client.logout()
-			return
-		elif " limit " in message.content:
-			args = message.content.split(" ")
-			resultLimit = int(args[2])
-		elif message.content.endswith(" help"):
-			yield from replyToMsg(message, "Put queries in [[double brackets]]. Separate search parameters with spaces. Replace spaces within search parameters with plus signs. \
+	@asyncio.coroutine
+	def setLimit(self, message, args):
+		if len(args) >= 3:
+			self.resultLimit = int(args[2])
+
+	@asyncio.coroutine
+	def getHelp(self, message, args):
+		yield from self.replyToMsg(message, "Put queries in [[double brackets]]. Separate search parameters with spaces. Replace spaces within search parameters with plus signs. \
 Queries are of the form 'property=value' e.g. 'name=Arc+Lightning'. Available properties include 'name', 'cmc', 'set' (three letter abbreviation), 'type', and more. Some \
 properties cannot be searched for e.g. 'manaCost'. An example suitable search message might be [[name=bolt cmc=1 type=instant]]")
-		return
 
-	startIndex, endIndex = 0, 0
-	try:
-		startIndex = message.content.index("[[")
-		endIndex = message.content.index("]]")
-	except:
-		startIndex = -1
-	if startIndex != -1 and endIndex != -1:
-		query = message.content[startIndex + 2:endIndex].split(" ")
-		if len(query) == 0:
-			return
-		printText = True
-		printImage = False
-		debug = False
-		if message.content.startswith("debug"):
-			debug = True
-		elif message.content.startswith("image"):
-			printImage = True
-			printText = False
-		elif message.content.startswith("combo"):
-			printImage = True
-		properties = getQueryProperties(query)
-		if properties is None:
-			yield from replyToMsg(message, "Sorry, your query failed")
-			return
+	@asyncio.coroutine
+	def search(self, message, args):
+		startIndex, endIndex = 0, 0
+		try:
+			startIndex = message.content.index("[[")
+			endIndex = message.content.index("]]")
+		except:
+			startIndex = -1
+		if startIndex != -1 and endIndex != -1:
+			query = message.content[startIndex + 2:endIndex].split(" ")
+			if len(query) == 0:
+				return
+			printText = True
+			printImage = False
+			debug = False
+			if message.content.startswith("debug"):
+				debug = True
+			elif message.content.startswith("image"):
+				printImage = True
+				printText = False
+			elif message.content.startswith("combo"):
+				printImage = True
+			properties = self.getQueryProperties(query)
+			if properties is None:
+				yield from self.replyToMsg(message, "Sorry, your query failed")
+				return
 
-		# search for cards
-		distinct = {}
-		found = 0
-		for card in Card.where(**properties).all():
-			if card.name not in distinct:
-				distinct[card.name] = card
-				found += 1
-		yield from replyToMsg(message, "Found {0} distinct card(s)".format(found))
-		if found == 0:
-			return
-		elif found > resultLimit:
-			yield from replyToMsg(message, "Result count exceeds limit. Aborting.")
-			return
-		for name, card in distinct.items():
-			if printText:
-				yield from printCard(message, card)
-			if printImage and "image_url" in card.__dict__:
-				yield from replyToMsg(message, card.__dict__["image_url"])
-			if debug:
-				print("Name: {0}; card: {1}".format(name, card.__dict__))
-		yield from replyToMsg(message, "End of search results")
+			# search for cards
+			distinct = {}
+			found = 0
+			for card in Card.where(**properties).all():
+				if card.name not in distinct:
+					distinct[card.name] = card
+					found += 1
+			yield from self.replyToMsg(message, "Found {0} distinct card(s)".format(found))
+			if found == 0:
+				return
+			elif found > self.resultLimit:
+				yield from self.replyToMsg(message, "Result count exceeds limit. Aborting.")
+				return
+			for name, card in distinct.items():
+				if printText:
+					yield from self.printCard(message, card)
+				if printImage and "image_url" in card.__dict__:
+					yield from self.replyToMsg(message, card.__dict__["image_url"])
+				if debug:
+					print("Name: {0}; card: {1}".format(name, card.__dict__))
+			yield from self.replyToMsg(message, "End of search results")
 
-file = open("tokens/" + name + ".token", "r")
-token = file.read()
-file.close()
-client.run(token)
+if __name__ == "__main__":
+	bot = Titania()
+	bot.run(bot.getToken())
