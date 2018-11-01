@@ -1,0 +1,6 @@
+*.token
+.*
+vongsprache
+input*
+script*
+__pycache__

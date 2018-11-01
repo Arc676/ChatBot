@@ -54,7 +54,7 @@ class CelestialBot(discord.Client):
 		return message.content.lower().startswith(self.name.lower() + " ") or self.user in message.mentions
 
 	def getToken(self):
-		file = open("tokens/" + self.name + ".token", "r")
+		file = open("tokens/" + self.name.lower() + ".token", "r")
 		token = file.read()
 		file.close()
 		return token
