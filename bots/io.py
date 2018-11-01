@@ -56,7 +56,7 @@ class Io(CelestialBot):
 				self.active = True
 				yield from self.replyToMsg(message, "I'm back")
 			return
-		if message.content == self.name:
+		if message.content.lower() == self.name.lower():
 			yield from self.replyToMsg(message, "Hi there!")
 		elif message.content.startswith(self.name):
 			if message.content.endswith(" go away"): # Makes chatbot leave

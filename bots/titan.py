@@ -34,7 +34,7 @@ class Titan(CelestialBot):
 
 	@asyncio.coroutine
 	def handle(self, message, args):
-		if "Bot Control" not in [str(role) for role in message.author.roles]:
+		if not self.isBotController(message.author):
 			return
 		if args[1] == "help":
 			yield from self.send_message(message.channel, "Available commands: update, start bot_name [bot_name ...], poll, die")

@@ -44,8 +44,11 @@ class CelestialBot(discord.Client):
 
 	@asyncio.coroutine
 	def killBot(self, message, args):
-		if not self.handleEverything or self.wasAddressed(message):
+		if self.isBotController(message.author) and not self.handleEverything or self.wasAddressed(message):
 			yield from self.logout()
+
+	def isBotController(self, author):
+		return "Bot Control" in [str(role) for role in author.roles]
 
 	def wasAddressed(self, message):
 		return message.content.lower().startswith(self.name.lower() + " ") or self.user in message.mentions
