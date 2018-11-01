@@ -31,13 +31,14 @@ class Iapetus(CelestialBot):
 		self.defaultCmd = self.printInfo
 		self.commands.update({
 			"countdown" : self.addCountdown,
-			"list" : self.listCountdowns
+			"list" : self.listCountdowns,
+			"delete" : self.removeCountdown
 		})
 
 	@asyncio.coroutine
 	def printInfo(self, message, args):
 		if args[1] == "help":
-			yield from self.send_message(message.channel, "Available commands: countdown event_name YYYY-MM-DD, list, die, help, about")
+			yield from self.send_message(message.channel, "Available commands: countdown event_name YYYY-MM-DD, delete event_name, list, die, help, about")
 		elif args[1] == "about":
 			yield from self.send_message(message.channel, "Iapetus is believed to be the Greek God of mortality. I share this name with one of Saturn's moons because my function is to provide a countdown to the inevitable.")
 
@@ -60,9 +61,22 @@ class Iapetus(CelestialBot):
 			yield from self.replyToMsg(message, "Something went wrong parsing your request")
 
 	@asyncio.coroutine
+	def removeCountdown(self, message, args):
+		if len(args) < 3:
+			return
+		idxs = [idx for idx in range(len(self.dates[message.author])) if self.dates[message.author][idx]["name"] == args[2]]
+		if len(idxs) > 0:
+			del self.dates[message.author][idxs[0]]
+			yield from self.replyToMsg(message, "Deleted countdown for event {0}".format(args[2]))
+			if len(idxs) > 1:
+				yield from self.replyToMsg(message, "You still have {0} event(s) named {1}".format(len(idxs) - 1, args[2]))
+		else:
+			yield from self.replyToMsg(message, "Couldn't find an event with the given name")
+
+	@asyncio.coroutine
 	def listCountdowns(self, message, args):
 		resp = "Your countdowns:"
-		if message.author in self.dates:
+		if message.author in self.dates and len(self.dates[message.author]) > 0:
 			for event in self.dates[message.author]:
 				resp += "\nDays until {0}: {1}".format(event["name"], self.daysUntil(event["date"]))
 		else:
