@@ -37,6 +37,7 @@ class CelestialBot(discord.Client):
 		self.name = name
 		self.allowBotControl = False
 		self.defaultCmd = None
+		self.handleEverything = False
 		self.commands = {
 			"die" : self.killBot
 		}
@@ -63,7 +64,7 @@ class CelestialBot(discord.Client):
 	def on_message(self, message):
 		if message.author.bot and not self.allowBotControl:
 			return
-		if message.content.lower().startswith(self.name.lower()) or self.user in message.mentions:
+		if message.content.lower().startswith(self.name.lower()) or self.user in message.mentions or self.handleEverything:
 			args = message.content.split(" ")
 			if len(args) >= 2 and args[1] in self.commands:
 				yield from self.commands[args[1]](message, args)

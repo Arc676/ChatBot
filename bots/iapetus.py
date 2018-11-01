@@ -20,65 +20,58 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import discord
+from bot import CelestialBot
 import asyncio
 import datetime
 
-client = discord.Client()
+class Iapetus(CelestialBot):
+	def __init__(self):
+		super().__init__("Iapetus")
+		self.dates = {}
+		self.defaultCmd = self.printInfo
+		self.commands.update({
+			"countdown" : self.addCountdown,
+			"list" : self.listCountdowns
+		})
 
-name = "iapetus"
-dates = {}
-
-@client.event
-@asyncio.coroutine
-def on_ready():
-	print("Logged in as " + client.user.name)
-
-@asyncio.coroutine
-def replyToMsg(msgObj, msg):
-	global client
-	yield from client.send_message(msgObj.channel, "{0} {1}".format(msgObj.author.mention, msg))
-
-def daysUntil(date):
-	return (date - datetime.date.today()).days
-
-@client.event
-@asyncio.coroutine
-def on_message(message):
-	if message.author.bot:
-		return
-	if message.content.startswith(name):
-		args = message.content.split(" ")
-		if len(args) < 2:
-			return
-		if args[1] == "die":
-			yield from client.logout()
-		elif args[1] == "help":
-			yield from client.send_message(message.channel, "Available commands: countdown event_name YYYY-MM-DD, list, die, help, about")
+	@asyncio.coroutine
+	def printInfo(self, message, args):
+		if args[1] == "help":
+			yield from self.send_message(message.channel, "Available commands: countdown event_name YYYY-MM-DD, list, die, help, about")
 		elif args[1] == "about":
-			yield from client.send_message(message.channel, "Iapetus is believed to be the Greek God of mortality. I share this name with one of Saturn's moons because my function is to provide a countdown to the inevitable.")
-		elif args[1] == "countdown":
-			if len(args) < 4:
-				return
-			try:
-				components = [int(c) for c in args[3].split("-")]
-				date = datetime.date(components[0], components[1], components[2])
-				if message.author not in dates:
-					dates[message.author] = []
-				dates[message.author].append({
-					"name" : args[2],
-					"date" : date
-				})
-				yield from replyToMsg(message, "Added countdown for {0}. Only {1} day(s) to go!".format(args[2], daysUntil(date)))
-			except:
-				yield from replyToMsg(message, "The provided date was invalid")
-		elif args[1] == "list":
-			resp = "Your countdowns:"
-			for event in dates[message.author]:
-				resp += "Days until {0}: {1}\n".format(event["name"], daysUntil(event["date"]))
-			yield from replyToMsg(message, resp.rstrip())
+			yield from self.send_message(message.channel, "Iapetus is believed to be the Greek God of mortality. I share this name with one of Saturn's moons because my function is to provide a countdown to the inevitable.")
 
-file = open("tokens/" + name + ".token", "r")
-token = file.read()
-file.close()
-client.run(token)
+	@asyncio.coroutine
+	def addCountdown(self, message, args):
+		if len(args) < 4:
+			return
+		try:
+			components = [int(c) for c in args[-1].split("-")]
+			name = " ".join(args[2:-1])
+			date = datetime.date(components[0], components[1], components[2])
+			if message.author not in self.dates:
+				self.dates[message.author] = []
+			self.dates[message.author].append({
+				"name" : name,
+				"date" : date
+			})
+			yield from self.replyToMsg(message, "Added countdown for {0}. Only {1} day(s) to go!".format(name, self.daysUntil(date)))
+		except:
+			yield from self.replyToMsg(message, "Something went wrong parsing your request")
+
+	@asyncio.coroutine
+	def listCountdowns(self, message, args):
+		resp = "Your countdowns:"
+		if message.author in self.dates:
+			for event in self.dates[message.author]:
+				resp += "\nDays until {0}: {1}".format(event["name"], self.daysUntil(event["date"]))
+		else:
+			resp = "You have no countdowns"
+		yield from self.replyToMsg(message, resp)
+
+	def daysUntil(self, date):
+		return (date - datetime.date.today()).days
+
+if __name__ == "__main__":
+	bot = Iapetus()
+	bot.run(bot.getToken())
