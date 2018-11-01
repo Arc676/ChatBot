@@ -28,7 +28,7 @@ from random import randint
 class Charon(CelestialBot):
 	def __init__(self):
 		super().__init__("Charon")
-		file = open("CAH/answers.txt", "r")
+		file = open("CAH/answers.txt", "r", encoding="utf-8")
 		self.allAnswers = file.readlines()
 		file.close()
 		self.aCount = len(self.allAnswers) - 1

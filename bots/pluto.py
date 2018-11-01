@@ -28,7 +28,7 @@ from random import randint
 class Pluto(CelestialBot):
 	def __init__(self):
 		super().__init__("Pluto")
-		file = open("CAH/questions.txt", "r")
+		file = open("CAH/questions.txt", "r", encoding="utf-8")
 		self.allQuestions = file.readlines()
 		file.close()
 		self.qCount = len(self.allQuestions) - 1

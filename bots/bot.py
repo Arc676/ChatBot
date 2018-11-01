@@ -51,7 +51,7 @@ class CelestialBot(discord.Client):
 		return "Bot Control" in [str(role) for role in author.roles]
 
 	def wasAddressed(self, message):
-		return message.content.lower().startswith(self.name.lower() + " ") or self.user in message.mentions
+		return message.content != "" and (message.content.split(" ")[0].lower() == self.name.lower() or self.user in message.mentions)
 
 	def getToken(self):
 		file = open("tokens/" + self.name.lower() + ".token", "r")
