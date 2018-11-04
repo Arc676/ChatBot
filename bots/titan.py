@@ -37,7 +37,7 @@ class Titan(CelestialBot):
 		if not self.isBotController(message.author):
 			return
 		if args[1] == "help":
-			yield from self.send_message(message.channel, "Available commands: update, start bot_name [bot_name ...], poll, die")
+			yield from self.send_message(message.channel, "Available commands: update, start bot_name [bot_name ...], kill bot_name [bot_name ...], poll, die")
 		elif args[1] == "update":
 			yield from self.send_message(message.channel, self.update())
 		elif args[1] == "start":
@@ -46,6 +46,12 @@ class Titan(CelestialBot):
 					yield from self.send_message(message.channel, "Illegal bot name")
 				else:
 					yield from self.send_message(message.channel, self.startBot(bot))
+		elif args[1] == "kill":
+			for bot in args[2:]:
+				if bot in self.procs:
+					subprocess.Popen(["kill", "-TERM", str(self.procs[bot])])
+					yield from self.send_message(message.channel, "Killed {0}".format(bot))
+			self.pollProcs()
 		elif args[1] == "poll":
 			self.pollProcs()
 			yield from self.send_message(message.channel, "Done")
@@ -59,17 +65,20 @@ class Titan(CelestialBot):
 			return "Updated repository"
 
 	def startBot(self, botname):
+		self.pollProcs()
 		if botname in self.procs:
-			return "{0} already running. Use `poll` to see if it died.".format(botname)
-		p = subprocess.Popen(["./startbot", botname])
-		self.procs[botname] = p
-		return "Started {0}".format(botname)
+			return "{0} already running.".format(botname)
+		p = subprocess.Popen(["python3", "bots/{0}.py".format(botname)])
+		self.procs[botname] = p.pid
+		return "Started {0} pid {1}".format(botname, p.pid)
 
 	def pollProcs(self):
 		i = 0
 		bots = list(self.procs.keys())
 		for bot in bots:
-			if self.procs[bot].poll is not None:
+			p = subprocess.Popen(["ps", str(self.procs[bot])])
+			p.wait()
+			if p.returncode != 0:
 				del self.procs[bot]
 			else:
 				i += 1

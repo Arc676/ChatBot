@@ -22,6 +22,13 @@
 
 import discord
 import asyncio
+import sys
+import signal
+
+instance = None
+
+def signal_handler(sig, frame):
+	asyncio.ensure_future(instance.logout()).__await__()
 
 class CelestialBot(discord.Client):
 	def __init__(self, name):
@@ -32,6 +39,10 @@ class CelestialBot(discord.Client):
 		"""
 		# token control and base class control
 		super().__init__()
+
+		global instance
+		instance = self
+		signal.signal(signal.SIGTERM, signal_handler)
 
 		# bot properties
 		self.name = name
@@ -44,7 +55,7 @@ class CelestialBot(discord.Client):
 
 	@asyncio.coroutine
 	def killBot(self, message, args):
-		if self.isBotController(message.author) and not self.handleEverything or self.wasAddressed(message):
+		if self.isBotController(message.author) and (not self.handleEverything or self.wasAddressed(message)):
 			yield from self.logout()
 
 	def isBotController(self, author):
