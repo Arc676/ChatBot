@@ -25,12 +25,18 @@ import asyncio
 import subprocess
 import re
 from pathlib import Path
+import sqlite3
 
 class Titan(CelestialBot):
 	def __init__(self):
 		super().__init__("Titan")
-		self.procs = {}
 		self.defaultCmd = self.handle
+		self.db = sqlite3.connect("titan.db")
+		self.dbc = self.db.cursor()
+		try:
+			self.dbc.execute("CREATE TABLE procs (botname text, pid INTEGER)")
+		except sqlite3.OperationalError:
+			pass
 
 	@asyncio.coroutine
 	def handle(self, message, args):
@@ -48,13 +54,16 @@ class Titan(CelestialBot):
 					yield from self.send_message(message.channel, self.startBot(bot))
 		elif args[1] == "kill":
 			for bot in args[2:]:
-				if bot in self.procs:
-					subprocess.Popen(["kill", "-TERM", str(self.procs[bot])])
+				record = self.dbc.execute("SELECT * FROM procs WHERE botname=?", (bot,)).fetchone()
+				if record is not None:
+					pid = tuple(record)[1]
+					subprocess.Popen(["kill", "-TERM", str(pid)])
 					yield from self.send_message(message.channel, "Killed {0}".format(bot))
 			self.pollProcs()
 		elif args[1] == "poll":
 			self.pollProcs()
 			yield from self.send_message(message.channel, "Done")
+		self.db.commit()
 
 	def update(self):
 		ret = subprocess.check_output("git pull -q".split(" ")).decode("utf-8")
@@ -66,20 +75,21 @@ class Titan(CelestialBot):
 
 	def startBot(self, botname):
 		self.pollProcs()
-		if botname in self.procs:
+		record = self.dbc.execute("SELECT * FROM procs WHERE botname=?", (botname,)).fetchone()
+		if record is not None:
 			return "{0} already running.".format(botname)
 		p = subprocess.Popen(["python3", "bots/{0}.py".format(botname)])
-		self.procs[botname] = p.pid
+		self.dbc.execute("INSERT INTO procs VALUES (?, ?)", (botname, p.pid))
 		return "Started {0} pid {1}".format(botname, p.pid)
 
 	def pollProcs(self):
 		i = 0
-		bots = list(self.procs.keys())
-		for bot in bots:
-			p = subprocess.Popen(["ps", str(self.procs[bot])])
+		for bot in self.dbc.execute("SELECT * FROM procs"):
+			botname, pid = tuple(bot)
+			p = subprocess.Popen(["ps", str(pid)])
 			p.wait()
 			if p.returncode != 0:
-				del self.procs[bot]
+				self.dbc.execute("DELETE FROM procs WHERE botname=? AND pid=?", (botname, pid))
 			else:
 				i += 1
 

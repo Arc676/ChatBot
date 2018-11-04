@@ -23,17 +23,23 @@
 from bot import CelestialBot
 import asyncio
 import datetime
+import sqlite3
 
 class Iapetus(CelestialBot):
 	def __init__(self):
 		super().__init__("Iapetus")
-		self.dates = {}
 		self.defaultCmd = self.printInfo
 		self.commands.update({
 			"countdown" : self.addCountdown,
 			"list" : self.listCountdowns,
 			"delete" : self.removeCountdown
 		})
+		self.db = sqlite3.connect("iapetus.db")
+		self.dbc = self.db.cursor()
+		try:
+			self.dbc.execute("CREATE TABLE dates (name text, date text, owner text)")
+		except sqlite3.OperationalError:
+			pass
 
 	@asyncio.coroutine
 	def printInfo(self, message, args):
@@ -47,39 +53,38 @@ class Iapetus(CelestialBot):
 		if len(args) < 4:
 			return
 		try:
-			components = [int(c) for c in args[-1].split("-")]
 			name = " ".join(args[2:-1])
-			date = datetime.date(components[0], components[1], components[2])
-			if message.author not in self.dates:
-				self.dates[message.author] = []
-			self.dates[message.author].append({
-				"name" : name,
-				"date" : date
-			})
-			yield from self.replyToMsg(message, "Added countdown for {0}. Only {1} day(s) to go!".format(name, self.daysUntil(date)))
-		except:
+			date = args[-1]
+			ddate = datetime.datetime.strptime(date, "%Y-%m-%d").date()
+			self.dbc.execute("INSERT INTO dates VALUES (?, ?, ?)", (name, date, message.author.id))
+			yield from self.replyToMsg(message, "Added countdown for {0}. Only {1} day(s) to go!".format(name, self.daysUntil(ddate)))
+		except Exception as e:
+			print(e)
 			yield from self.replyToMsg(message, "Something went wrong parsing your request")
+		self.db.commit()
 
 	@asyncio.coroutine
 	def removeCountdown(self, message, args):
 		if len(args) < 3:
 			return
-		idxs = [idx for idx in range(len(self.dates[message.author])) if self.dates[message.author][idx]["name"] == args[2]]
-		if len(idxs) > 0:
-			del self.dates[message.author][idxs[0]]
-			yield from self.replyToMsg(message, "Deleted countdown for event {0}".format(args[2]))
-			if len(idxs) > 1:
-				yield from self.replyToMsg(message, "You still have {0} event(s) named {1}".format(len(idxs) - 1, args[2]))
+		if self.dbc.execute("DELETE FROM dates WHERE name=?", args[2]).rowcount > 0:
+			yield from self.replyToMsg(message, "Deleted countdown(s) named {0}".format(args[2]))
 		else:
 			yield from self.replyToMsg(message, "Couldn't find an event with the given name")
+		self.db.commit()
 
 	@asyncio.coroutine
 	def listCountdowns(self, message, args):
 		resp = "Your countdowns:"
-		if message.author in self.dates and len(self.dates[message.author]) > 0:
-			for event in self.dates[message.author]:
-				resp += "\nDays until {0}: {1}".format(event["name"], self.daysUntil(event["date"]))
-		else:
+		events = self.dbc.execute("SELECT * FROM dates WHERE owner=?", (message.author.id,))
+		count = 0
+		for event in events:
+			count += 1
+			data = tuple(event)
+			name = data[0]
+			date = datetime.datetime.strptime(data[1], "%Y-%m-%d").date()
+			resp += "\nDays until {0}: {1}".format(name, self.daysUntil(date))
+		if count == 0:
 			resp = "You have no countdowns"
 		yield from self.replyToMsg(message, resp)
 
