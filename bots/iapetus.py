@@ -28,6 +28,7 @@ import sqlite3
 class Iapetus(CelestialBot):
 	def __init__(self):
 		super().__init__("Iapetus")
+		self.handleEverything = True
 		self.defaultCmd = self.printInfo
 		self.commands.update({
 			"countdown" : self.addCountdown,
@@ -38,11 +39,22 @@ class Iapetus(CelestialBot):
 		self.dbc = self.db.cursor()
 		try:
 			self.dbc.execute("CREATE TABLE dates (name text, date text, owner text)")
+			self.dbc.execute("CREATE TABLE lastReminder (owner text, date text)")
 		except sqlite3.OperationalError:
 			pass
 
 	@asyncio.coroutine
 	def printInfo(self, message, args):
+		lastReminder = self.dbc.execute("SELECT date FROM lastReminder WHERE owner=?", (message.author.id,)).fetchone()
+		if lastReminder is not None:
+			lastReminder = tuple(lastReminder)[0]
+			lastRemDate = datetime.datetime.strptime(str(lastReminder), "%Y-%m-%d").date()
+			if self.daysUntil(lastRemDate) < 0:
+				self.updateUserReminderDate(message.author)
+				if len(list(self.getUserCountdowns(message.author))) > 0:
+					yield from self.listCountdowns(message, args)
+		if len(args) < 2:
+			return
 		if args[1] == "help":
 			yield from self.send_message(message.channel, "Available commands: countdown event_name YYYY-MM-DD, delete event_name, list, die, help, about")
 		elif args[1] == "about":
@@ -57,6 +69,12 @@ class Iapetus(CelestialBot):
 			date = args[-1]
 			ddate = datetime.datetime.strptime(date, "%Y-%m-%d").date()
 			self.dbc.execute("INSERT INTO dates VALUES (?, ?, ?)", (name, date, message.author.id))
+
+			# check if user has an entry in lastReminder
+			if self.dbc.execute("SELECT * FROM lastReminder WHERE owner=?", (message.author.id,)).fetchone() is None:
+				today = datetime.date.today().isoformat()
+				self.dbc.execute("INSERT INTO lastReminder VALUES (?, ?)", (message.author.id, today))
+
 			yield from self.replyToMsg(message, "Added countdown for {0}. Only {1} day(s) to go!".format(name, self.daysUntil(ddate)))
 		except Exception as e:
 			print(e)
@@ -79,8 +97,9 @@ class Iapetus(CelestialBot):
 
 	@asyncio.coroutine
 	def listCountdowns(self, message, args):
+		self.updateUserReminderDate(message.author)
 		resp = "Your countdowns:"
-		events = self.dbc.execute("SELECT * FROM dates WHERE owner=?", (message.author.id,))
+		events = self.getUserCountdowns(message.author)
 		count = 0
 		for event in events:
 			count += 1
@@ -91,6 +110,14 @@ class Iapetus(CelestialBot):
 		if count == 0:
 			resp = "You have no countdowns"
 		yield from self.replyToMsg(message, resp)
+
+	def updateUserReminderDate(self, user):
+		now = datetime.date.today().isoformat()
+		self.dbc.execute("UPDATE lastReminder SET date=? WHERE owner=?", (now, user.id))
+		self.db.commit()
+
+	def getUserCountdowns(self, user):
+		return self.dbc.execute("SELECT * FROM dates WHERE owner=?", (user.id,))
 
 	def daysUntil(self, date):
 		return (date - datetime.date.today()).days
