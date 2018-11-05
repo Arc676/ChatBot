@@ -67,8 +67,12 @@ class Iapetus(CelestialBot):
 	def removeCountdown(self, message, args):
 		if len(args) < 3:
 			return
-		if self.dbc.execute("DELETE FROM dates WHERE name=?", args[2]).rowcount > 0:
-			yield from self.replyToMsg(message, "Deleted countdown(s) named {0}".format(args[2]))
+		event = " ".join(args[2:])
+		before = int(self.dbc.execute("SELECT COUNT(*) FROM dates WHERE name=?", (event,)).fetchone()[0])
+		self.dbc.execute("DELETE FROM dates WHERE name=?", (event,))
+		now = int(self.dbc.execute("SELECT COUNT(*) FROM dates WHERE name=?", (event,)).fetchone()[0])
+		if now - before < 0:
+			yield from self.replyToMsg(message, "Deleted {0} countdown(s) named {1}".format(before - now, event))
 		else:
 			yield from self.replyToMsg(message, "Couldn't find an event with the given name")
 		self.db.commit()

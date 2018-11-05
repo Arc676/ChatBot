@@ -4,3 +4,4 @@ vongsprache
 input*
 script*
 __pycache__
+*.db

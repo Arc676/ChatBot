@@ -84,8 +84,7 @@ class Titan(CelestialBot):
 
 	def pollProcs(self):
 		i = 0
-		for bot in self.dbc.execute("SELECT * FROM procs"):
-			botname, pid = tuple(bot)
+		for botname, pid in [tuple(record) for record in self.dbc.execute("SELECT * FROM procs")]:
 			p = subprocess.Popen(["ps", str(pid)])
 			p.wait()
 			if p.returncode != 0:
