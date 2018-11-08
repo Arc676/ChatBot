@@ -98,18 +98,41 @@ class Iapetus(CelestialBot):
 	@asyncio.coroutine
 	def listCountdowns(self, message, args):
 		self.updateUserReminderDate(message.author)
-		resp = "Your countdowns:"
 		events = self.getUserCountdowns(message.author)
 		count = 0
+		pastEvents = []
+
+		resp = "Your countdowns:"
+		today = ""
 		for event in events:
 			count += 1
 			data = tuple(event)
+
 			name = data[0]
 			date = datetime.datetime.strptime(data[1], "%Y-%m-%d").date()
-			resp += "\nDays until {0}: {1}".format(name, self.daysUntil(date))
+			remaining = self.daysUntil(date)
+
+			if remaining == 0:
+				today += "\n{0} is today!".format(name)
+			else:
+				resp += "\nDays until {0}: {1}".format(name, remaining)
+
+			if remaining <= 0:
+				pastEvents.append(data)
+
+		if today != "":
+			resp += "\n{0}".format(today)
+
 		if count == 0:
 			resp = "You have no countdowns"
+
 		yield from self.replyToMsg(message, resp)
+
+		toDelete = len(pastEvents)
+		if toDelete > 0:
+			for eventData in pastEvents:
+				self.dbc.execute("DELETE FROM dates WHERE name=? and date=? and owner=?", eventData)
+			yield from self.replyToMsg(message, "Deleted {0} events that are either today or in the past".format(toDelete))
 
 	def updateUserReminderDate(self, user):
 		now = datetime.date.today().isoformat()

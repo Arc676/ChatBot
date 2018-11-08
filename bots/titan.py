@@ -97,12 +97,12 @@ class Titan(CelestialBot):
 		return super().getHandler(message, args)
 
 	def update(self):
-		ret = subprocess.check_output("git fetch origin; git log HEAD..origin/master --oneline".split()).decode("utf-8")
+		ret = subprocess.check_output("git fetch -q origin; git log HEAD..origin/master --oneline", shell=True).decode("utf-8")
 
 		if ret == "":
 			return "Was already up to date"
 		else:
-			subprocess.Popen("git pull -q".split())
+			subprocess.check_output("git pull -q".split())
 			return "Updated repository"
 
 	def startBot(self, botname):
