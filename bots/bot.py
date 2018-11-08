@@ -59,7 +59,10 @@ class CelestialBot(discord.Client):
 			yield from self.logout()
 
 	def isBotController(self, author):
-		return "Bot Control" in [str(role) for role in author.roles]
+		file = open(".botcontrollers", "r")
+		isController = str(author.id) in [line.strip() for line in file.readlines()]
+		file.close()
+		return isController
 
 	def wasAddressed(self, message):
 		return message.content != "" and (message.content.split()[0].lower().strip() == self.name.lower() or self.user in message.mentions)

@@ -32,6 +32,8 @@ class Titan(CelestialBot):
 		super().__init__("Titan")
 		self.commands.update({
 			"help" : self.printHelp,
+			"register" : self.registerController,
+			"unregister" : self.unregisterController,
 			"update" : self.updateRepo,
 			"start" : self.launchBot,
 			"restart" : self.restart,
@@ -47,7 +49,7 @@ class Titan(CelestialBot):
 
 	@asyncio.coroutine
 	def printHelp(self, message, args):
-		yield from self.send_message(message.channel, "Available commands: update, start|kill|restart bot_name [bot_name ...], list, die")
+		yield from self.send_message(message.channel, "Available commands: update, start|kill|restart bot_name [bot_name ...], register|unregister user_id, list, die")
 
 	@asyncio.coroutine
 	def updateRepo(self, message, args):
@@ -87,6 +89,25 @@ class Titan(CelestialBot):
 				for record in self.dbc.execute("SELECT * FROM procs")])
 		)
 		yield from self.send_message(message.channel, resp)
+
+	@asyncio.coroutine
+	def registerController(self, message, args):
+		file = open(".botcontrollers", "a")
+		file.write("\n{0}".format(args[2]))
+		file.close()
+		yield from self.send_message(message.channel, "Registered user ID {0} as bot controller".format(args[2]))
+
+	@asyncio.coroutine
+	def unregisterController(self, message, args):
+		file = open(".botcontrollers", "r")
+		controllers = file.readlines()
+		file.close()
+		controllers = filter(lambda x: x.strip() != args[2], controllers)
+		file = open(".botcontrollers", "w")
+		for controller in controllers:
+			file.write(controller)
+		file.close()
+		yield from self.send_message(message.channel, "Removed user ID {0} from bot controllers".format(args[2]))
 
 	def isValidBotName(self, botname):
 		return not re.search("[^a-zA-Z]", botname)
