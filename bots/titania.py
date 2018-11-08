@@ -97,7 +97,7 @@ properties cannot be searched for e.g. 'manaCost'. An example suitable search me
 		except:
 			startIndex = -1
 		if startIndex != -1 and endIndex != -1:
-			query = message.content[startIndex + 2:endIndex].split(" ")
+			query = message.content[startIndex + 2:endIndex].split()
 			if len(query) == 0:
 				return
 			printText = True

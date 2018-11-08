@@ -90,7 +90,7 @@ class CelestialBot(discord.Client):
 
 	@asyncio.coroutine
 	def on_message(self, message):
-		args = message.content.split(" ")
+		args = message.content.split()
 		handler = self.getHandler(message, args)
 		if handler is not None:
 			yield from handler(message, args)

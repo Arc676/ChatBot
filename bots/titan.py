@@ -36,7 +36,6 @@ class Titan(CelestialBot):
 			"start" : self.launchBot,
 			"restart" : self.restart,
 			"kill" : self.kill,
-			"poll" : self.poll,
 			"list" : self.listBots
 		})
 		self.db = sqlite3.connect("titan.db")
@@ -48,7 +47,7 @@ class Titan(CelestialBot):
 
 	@asyncio.coroutine
 	def printHelp(self, message, args):
-		yield from self.send_message(message.channel, "Available commands: update, start bot_name [bot_name ...], kill bot_name [bot_name ...], poll, die")
+		yield from self.send_message(message.channel, "Available commands: update, start|kill|restart bot_name [bot_name ...], list, die")
 
 	@asyncio.coroutine
 	def updateRepo(self, message, args):
@@ -81,13 +80,8 @@ class Titan(CelestialBot):
 				yield from self.send_message(message.channel, "Illegal bot name")
 
 	@asyncio.coroutine
-	def poll(self, message, args):
-		self.pollProcs()
-		yield from self.send_message(message.channel, "Done")
-		self.db.commit()
-
-	@asyncio.coroutine
 	def listBots(self, message, args):
+		self.pollProcs()
 		resp = "Running bots:\n{0}".format(
 			"\n".join([(lambda x: "Name: {0}, PID: {1}".format(x[0], x[1]))(tuple(record))
 				for record in self.dbc.execute("SELECT * FROM procs")])
@@ -103,11 +97,12 @@ class Titan(CelestialBot):
 		return super().getHandler(message, args)
 
 	def update(self):
-		ret = subprocess.check_output("git pull -q".split()).decode("utf-8")
+		ret = subprocess.check_output("git fetch origin; git log HEAD..origin/master --oneline".split()).decode("utf-8")
 
 		if ret == "":
 			return "Was already up to date"
 		else:
+			subprocess.Popen("git pull -q".split())
 			return "Updated repository"
 
 	def startBot(self, botname):
@@ -124,6 +119,7 @@ class Titan(CelestialBot):
 		if record is not None:
 			pid = tuple(record)[1]
 			subprocess.Popen(["kill", "-TERM", str(pid)])
+			self.pollProcs()
 			return "Killed {0}".format(bot)
 		return "Bot {0} not found".format(bot)
 
@@ -136,6 +132,7 @@ class Titan(CelestialBot):
 				self.dbc.execute("DELETE FROM procs WHERE botname=? AND pid=?", (botname, pid))
 			else:
 				i += 1
+		self.db.commit()
 
 if __name__ == "__main__":
 	bot = Titan()
