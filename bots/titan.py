@@ -30,7 +30,15 @@ import sqlite3
 class Titan(CelestialBot):
 	def __init__(self):
 		super().__init__("Titan")
-		self.defaultCmd = self.handle
+		self.commands.update({
+			"help" : self.printHelp,
+			"update" : self.updateRepo,
+			"start" : self.launchBot,
+			"restart" : self.restart,
+			"kill" : self.kill,
+			"poll" : self.poll,
+			"list" : self.listBots
+		})
 		self.db = sqlite3.connect("titan.db")
 		self.dbc = self.db.cursor()
 		try:
@@ -39,34 +47,63 @@ class Titan(CelestialBot):
 			pass
 
 	@asyncio.coroutine
-	def handle(self, message, args):
-		if not self.isBotController(message.author):
-			return
-		if args[1] == "help":
-			yield from self.send_message(message.channel, "Available commands: update, start bot_name [bot_name ...], kill bot_name [bot_name ...], poll, die")
-		elif args[1] == "update":
-			yield from self.send_message(message.channel, self.update())
-		elif args[1] == "start":
-			for bot in args[2:]:
-				if re.search("[^a-zA-Z]", bot):
-					yield from self.send_message(message.channel, "Illegal bot name")
-				else:
-					yield from self.send_message(message.channel, self.startBot(bot))
-		elif args[1] == "kill":
-			for bot in args[2:]:
-				record = self.dbc.execute("SELECT * FROM procs WHERE botname=?", (bot,)).fetchone()
-				if record is not None:
-					pid = tuple(record)[1]
-					subprocess.Popen(["kill", "-TERM", str(pid)])
-					yield from self.send_message(message.channel, "Killed {0}".format(bot))
-			self.pollProcs()
-		elif args[1] == "poll":
-			self.pollProcs()
-			yield from self.send_message(message.channel, "Done")
+	def printHelp(self, message, args):
+		yield from self.send_message(message.channel, "Available commands: update, start bot_name [bot_name ...], kill bot_name [bot_name ...], poll, die")
+
+	@asyncio.coroutine
+	def updateRepo(self, message, args):
+		yield from self.send_message(message.channel, self.update())
+
+	@asyncio.coroutine
+	def launchBot(self, message, args):
+		for bot in args[2:]:
+			if self.isValidBotName(bot):
+				yield from self.send_message(message.channel, self.startBot(bot))
+			else:
+				yield from self.send_message(message.channel, "Illegal bot name")
 		self.db.commit()
 
+	@asyncio.coroutine
+	def kill(self, message, args):
+		for bot in args[2:]:
+			yield from self.send_message(message.channel, self.terminateBot(bot))
+		self.pollProcs()
+		self.db.commit()
+
+	@asyncio.coroutine
+	def restart(self, message, args):
+		for bot in args[2:]:
+			if self.isValidBotName(bot):
+				resp = self.terminateBot(bot) + "\n"
+				resp += self.startBot(bot)
+				yield from self.send_message(message.channel, resp)
+			else:
+				yield from self.send_message(message.channel, "Illegal bot name")
+
+	@asyncio.coroutine
+	def poll(self, message, args):
+		self.pollProcs()
+		yield from self.send_message(message.channel, "Done")
+		self.db.commit()
+
+	@asyncio.coroutine
+	def listBots(self, message, args):
+		resp = "Running bots:\n{0}".format(
+			"\n".join([(lambda x: "Name: {0}, PID: {1}".format(x[0], x[1]))(tuple(record))
+				for record in self.dbc.execute("SELECT * FROM procs")])
+		)
+		yield from self.send_message(message.channel, resp)
+
+	def isValidBotName(self, botname):
+		return not re.search("[^a-zA-Z]", botname)
+
+	def getHandler(self, message, args):
+		if not self.isBotController(message.author):
+			return None
+		return super().getHandler(message, args)
+
 	def update(self):
-		ret = subprocess.check_output("git pull -q".split(" ")).decode("utf-8")
+		ret = subprocess.check_output("git pull -q".split()).decode("utf-8")
 
 		if ret == "":
 			return "Was already up to date"
@@ -81,6 +118,14 @@ class Titan(CelestialBot):
 		p = subprocess.Popen(["python3", "bots/{0}.py".format(botname)])
 		self.dbc.execute("INSERT INTO procs VALUES (?, ?)", (botname, p.pid))
 		return "Started {0} pid {1}".format(botname, p.pid)
+
+	def terminateBot(self, bot):
+		record = self.dbc.execute("SELECT * FROM procs WHERE botname=?", (bot,)).fetchone()
+		if record is not None:
+			pid = tuple(record)[1]
+			subprocess.Popen(["kill", "-TERM", str(pid)])
+			return "Killed {0}".format(bot)
+		return "Bot {0} not found".format(bot)
 
 	def pollProcs(self):
 		i = 0

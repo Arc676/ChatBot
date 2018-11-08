@@ -62,13 +62,23 @@ class CelestialBot(discord.Client):
 		return "Bot Control" in [str(role) for role in author.roles]
 
 	def wasAddressed(self, message):
-		return message.content != "" and (message.content.split(" ")[0].lower().strip() == self.name.lower() or self.user in message.mentions)
+		return message.content != "" and (message.content.split()[0].lower().strip() == self.name.lower() or self.user in message.mentions)
 
 	def getToken(self):
 		file = open("tokens/" + self.name.lower() + ".token", "r")
 		token = file.read()
 		file.close()
 		return token
+
+	def getHandler(self, message, args):
+		if message.author.bot and not self.allowBotControl:
+			return None
+		if self.wasAddressed(message):
+			if len(args) >= 2 and args[1] in self.commands:
+				return self.commands[args[1]]
+			return self.defaultCmd
+		elif self.handleEverything:
+			return self.defaultCmd
 
 	@asyncio.coroutine
 	def replyToMsg(self, msgObj, msg):
@@ -80,13 +90,7 @@ class CelestialBot(discord.Client):
 
 	@asyncio.coroutine
 	def on_message(self, message):
-		if message.author.bot and not self.allowBotControl:
-			return
 		args = message.content.split(" ")
-		if self.wasAddressed(message):
-			if len(args) >= 2 and args[1] in self.commands:
-				yield from self.commands[args[1]](message, args)
-			elif self.defaultCmd is not None:
-				yield from self.defaultCmd(message, args)
-		elif self.handleEverything and self.defaultCmd is not None:
-			yield from self.defaultCmd(message, args)
+		handler = self.getHandler(message, args)
+		if handler is not None:
+			yield from handler(message, args)

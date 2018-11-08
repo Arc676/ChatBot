@@ -53,7 +53,7 @@ class Iapetus(CelestialBot):
 				self.updateUserReminderDate(message.author)
 				if len(list(self.getUserCountdowns(message.author))) > 0:
 					yield from self.listCountdowns(message, args)
-		if len(args) < 2:
+		if not self.wasAddressed(message) or len(args) < 2:
 			return
 		if args[1] == "help":
 			yield from self.send_message(message.channel, "Available commands: countdown event_name YYYY-MM-DD, delete event_name, list, die, help, about")
