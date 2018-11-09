@@ -42,9 +42,9 @@ class Deimos(CelestialBot):
 				data["script"] = blocks[1].strip()
 				data["input"] = blocks[3].strip() + "\n"
 				resp = self.evaluate(data)
-				yield from self.send_message(message.channel, "```{0}```".format(resp.decode("utf-8")))
-			except:
-				yield from self.send_message(message.channel, "Malformed request")
+				yield from self.send_message(message.channel, "```{0}```".format(resp))
+			except Exception as e:
+				yield from self.send_message(message.channel, "Malformed request. Exception:\n{0}".format(str(e)))
 
 	def evaluate(self, data):
 		self.runningScripts += 1
@@ -63,9 +63,9 @@ class Deimos(CelestialBot):
 		ret = ""
 		try:
 			fdi = open(iFile, "r")
-			ret = subprocess.check_output(["./vongsprache", sFile], stdin=fdi)
+			ret = subprocess.check_output(["./vongsprache", sFile], stderr=subprocess.PIPE, stdin=fdi).decode("utf-8")
 		except subprocess.CalledProcessError as e:
-			ret = "Err {0}: {1}".format(e.returncode, e.output)
+			ret = "Err {0}: {1}".format(e.returncode, e.stderr.decode("utf-8"))
 		finally:
 			fdi.close()
 
