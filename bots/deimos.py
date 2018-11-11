@@ -30,12 +30,12 @@ class Deimos(CelestialBot):
 		super().__init__("Deimos")
 		self.runningScripts = 0
 		self.defaultCmd = self.handle
+		self.help = "To run a script, the message must start with \"deimos\" and contain two code blocks with no language. The first code block should contain the script and the second the contents to be passed to `stdin`."
+		self.about = "I'm Deimos, named after the smaller and outermost of Mars' two moons. I execute Vongsprache scripts."
 
 	@asyncio.coroutine
 	def handle(self, message, args):
-		if args[1] == "help":
-			yield from self.send_message(message.channel, "To run a script, the message must start with \"deimos\" and contain two code blocks with no language. The first code block contains the script and the second is passed to `stdin`.")
-		else:
+		if self.wasAddressed(message):
 			try:
 				data = {}
 				blocks = message.content.split("```")

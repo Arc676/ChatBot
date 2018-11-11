@@ -30,12 +30,16 @@ class Nix(CelestialBot):
 		self.answers = {}
 		self.allowBotControl = True
 		self.defaultCmd = self.handle
+		self.help = """Commands available for Nix
+newgame lowerBound upperBound -- starts a new number guess game with the answer lying between the given bounds
+[a number] -- guess the number and Nix will provide feedback
+help -- shows this help message
+about -- shows information about Nix"""
+		self.about = "Hi! My name is Nix, one of the moons of Pluto! Unlike Charon, I was discovered recently along with Kerberos, Hydra, and my fellow bot Styx. I'm named after the Greek embodiment of night and darkness, but the spelling was changed so I would not be confused for an asteroid named Nyx."
 
 	@asyncio.coroutine
 	def handle(self, message, args):
-		if message.content.endswith(" about"): 
-			yield from self.replyToMsg(message, "Hi! My name is Nix, one of the moons of Pluto! Unlike Charon, I was discovered recently along with Kerberos, Hydra, and my fellow bot Styx. I'm named after the Greek embodiment of night and darkness, but the spelling was changed so I would not be confused for an asteroid named Nyx.")
-		elif "newgame" in args:
+		if "newgame" in args:
 			if len(args) != 4:
 				yield from self.replyToMsg(message, "Usage: nix newgame lowBound upBound")
 				return

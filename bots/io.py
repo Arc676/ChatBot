@@ -48,6 +48,15 @@ class Io(CelestialBot):
 		self.active = True
 		self.defaultCmd = self.handle
 		self.handleEverything = True
+		self.help = """Commands available for Io
+go away -- deactivates Io until called back
+come back -- reactivates Io
+rtfm -- provides a link to the repository for the Discord API module
+help -- shows this help message
+about -- shows information about Io
+
+Io also responds to various movie quotes and assorted phrases."""
+		self.about = "Hi, My name is Io, one of the Galilean moons of Jupiter!  I was discovered by Galileo in a telescope he built, and am the 3rd most massive of Jupiter's 69 moons.  One of my most notable feature is Tvashtar, a giant volcano."
 
 	@asyncio.coroutine
 	def handle(self, message, args):
@@ -62,12 +71,8 @@ class Io(CelestialBot):
 			if message.content.endswith(" go away"): # Makes chatbot leave
 				self.active = False
 				yield from self.replyToMsg(message, "OK :(")
-			elif message.content.endswith(" help"):
-				yield from self.replyToMsg(message, "Recognized commands:\n\thelp\n\tgo away\n\tcome back\n\tdie\n\trtfm\n\t(various movie quotes)")
 			elif message.content.endswith(" rtfm"):
 				yield from self.replyToMsg(message, "Follow your own advice: https://github.com/Rapptz/discord.py")
-			elif message.content.endswith(" about"):
-				yield from self.replyToMsg(message, "Hi, My name is Io, one of the Galilean moons of Jupiter!  I was discovered by Galileo in a telescope he built, and am the 3rd most massive of Jupiter's 69 moons.  One of my most notable feature is Tvashtar, a giant volcano.")
 			else:
 				yield from self.replyToMsg(message, "Yes?")
 		else: # Runs commands and performs call and response

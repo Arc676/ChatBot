@@ -28,6 +28,8 @@ from random import randint
 class Charon(CelestialBot):
 	def __init__(self):
 		super().__init__("Charon")
+		self.help = "Type my name to get a random CAH answer. Optionally, add a number after my name to get that many answers at once"
+		self.about = "I'm Charon, named after the largest of Pluto's moons. Charon is the ferryman of the dead in Greek mythology."
 		file = open("CAH/answers.txt", "r", encoding="utf-8")
 		self.allAnswers = file.readlines()
 		file.close()

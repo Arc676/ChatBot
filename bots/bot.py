@@ -46,12 +46,24 @@ class CelestialBot(discord.Client):
 
 		# bot properties
 		self.name = name
+		self.help = "No help available"
+		self.about = "No bot description available"
 		self.allowBotControl = False
 		self.defaultCmd = None
 		self.handleEverything = False
 		self.commands = {
-			"die" : self.killBot
+			"die" : self.killBot,
+			"help" : self.showHelp,
+			"about" : self.showAbout
 		}
+
+	@asyncio.coroutine
+	def showHelp(self, message, args):
+		yield from self.send_message(message.channel, self.help)
+
+	@asyncio.coroutine
+	def showAbout(self, message, args):
+		yield from self.send_message(message.channel, self.about)
 
 	@asyncio.coroutine
 	def killBot(self, message, args):

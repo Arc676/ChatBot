@@ -28,20 +28,22 @@ class Prometheus(CelestialBot):
 	def __init__(self):
 		super().__init__("Prometheus")
 		self.defaultCmd = self.printInfo
+		self.help = """Commands available for Prometheus
+fact -- generates a random calendar fact from the options available in xkcd 1930
+1228 | 1930 -- provides a link to the xkcd comic with the given number, both of which are related to Prometheus' functionality
+help -- shows this help message
+about -- shows information about prometheus"""
+		self.about = "Hi! My name is Prometheus. I'm one of Saturn's satellites. The picture on my profile was taken by Cassini. I'm named after the Greek Titan who created humans from clay and stole fire from the Gods. Prometheus also featured on xkcd 1228."
 		self.commands.update({
 			"fact" : self.replyWithFact
 		})
 
 	@asyncio.coroutine
 	def printInfo(self, message, args):
-		if args[1] == "about": 
-			yield from self.replyToMsg(message, "Hi! My name is Prometheus. I'm one of Saturn's satellites. The picture you see was taken by Cassini. I'm named after the Greek Titan who created humans from clay and stole fire from the Gods. Prometheus also featured on xkcd 1228.")
-		elif args[1] == "1228":
+		if args[1] == "1228":
 			yield from self.replyToMsg(message, "https://xkcd.com/1228/")
 		elif args[1] == "1930":
 			yield from self.replyToMsg(message, "https://xkcd.com/1930/")
-		elif args[1] == "help":
-			yield from self.replyToMsg(message, "Type \"prometheus\" followed by about, die, 1228, 1930, or fact")
 
 	@staticmethod
 	def pick(options):

@@ -32,14 +32,15 @@ class Styx(CelestialBot):
 		self.guess = {}
 		self.bounds = {}
 		self.defaultCmd = self.handleGuess
+		self.help = """Commands available for Styx
+play username lowerBound upperBound [verbose] -- starts a new game against the specified user with the given bounds; if verbose is set, Styx will send a separate message to start the game (to be used if Styx is to play against Nix)
+low | correct | high -- provide feedback for Styx' guess (the word needs to be contained in the message)
+help -- shows this help message
+about -- shows information about Styx"""
+		self.about = "Hi, I'm Styx! I'm one of the smaller moons of Pluto. I'm so small that I'm more of an oblong potato than a sphere! I'm named after the river in the Greek underworld that made Achilles invulnerable - except for his heel of course."
 		self.commands.update({
-			"about" : self.getAbout,
 			"play" : self.startGame
 		})
-
-	@asyncio.coroutine
-	def getAbout(self, message, args):
-		yield from self.replyToMsg(message, "Hi, I'm Styx! I'm one of the smaller moons of Pluto. I'm so small that I'm more of an oblong potato than a sphere! I'm named after the river in the Greek underworld that made Achilles invulnerable - except for his heel of course.")
 
 	@asyncio.coroutine
 	def handleGuess(self, message, args):

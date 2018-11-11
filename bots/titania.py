@@ -48,8 +48,11 @@ class Titania(CelestialBot):
 		self.resultLimit = 10
 		self.handleEverything = True
 		self.defaultCmd = self.search
+		self.help = """Put queries in [[double brackets]]. Separate search parameters with spaces. Replace spaces within search parameters with plus signs.
+
+Queries are of the form 'property=value' e.g. 'name=Arc+Lightning'. Available properties include 'name', 'cmc', 'set' (three letter abbreviation), 'type', and more. Some properties cannot be searched for due to limitations in the API e.g. 'manaCost'. An example suitable search message might be [[name=bolt cmc=1 type=instant]]"""
+		self.about = "I'm Titania, named after the largest of Uranus' moons and the queen of the fairies in Shakespeare's _A Midsummer Night's Dream_. Titania is also the name of a creature in Magic the Gathering."
 		self.commands.update({
-			"help" : self.getHelp,
 			"limit" : self.setLimit
 		})
 
@@ -84,9 +87,7 @@ class Titania(CelestialBot):
 
 	@asyncio.coroutine
 	def getHelp(self, message, args):
-		yield from self.replyToMsg(message, "Put queries in [[double brackets]]. Separate search parameters with spaces. Replace spaces within search parameters with plus signs. \
-Queries are of the form 'property=value' e.g. 'name=Arc+Lightning'. Available properties include 'name', 'cmc', 'set' (three letter abbreviation), 'type', and more. Some \
-properties cannot be searched for e.g. 'manaCost'. An example suitable search message might be [[name=bolt cmc=1 type=instant]]")
+		yield from self.replyToMsg(message, )
 
 	@asyncio.coroutine
 	def search(self, message, args):

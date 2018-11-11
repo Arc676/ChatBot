@@ -29,18 +29,20 @@ class Janus(CelestialBot):
 		super().__init__("Janus")
 		self.polls = {}
 		self.openPolls = 0
+		self.help = """Commands available for Janus
+poll PollName option1 option2 [option3 ..] -- creates a new poll named PollName; this name cannot have spaces; at least 2 choices must be available
+close PollName -- closes the poll PollName and shows the results
+vote PollName choice -- votes for 'choice' in the poll 'PollName'
+list -- shows all currently running polls
+choose option1 option2 [option3 ...] -- randomly chooses between the options; there must be at least two choices available"""
+		self.about = "I'm Janus, named after the Roman God of beginnings and ends; duality; gates, doorways, and passageways; transitions; and time. I also share my name with an inner satellite of Saturn, also known as Saturn X."
 		self.commands.update({
-			"help" : self.getHelp,
 			"poll" : self.newPoll,
 			"close" : self.closePoll,
 			"vote" : self.voteOnPoll,
 			"list" : self.listPolls,
 			"choose" : self.chooseFromList
 		})
-
-	@asyncio.coroutine
-	def getHelp(self, message, args):
-		yield from self.replyToMsg(message, "Janus commands:\njanus poll PollName option1 option2 [option3 ...]\njanus close PollName\njanus vote PollName choice\njanus list\njanus choose option1 option2 [option3 ...]")
 
 	@asyncio.coroutine
 	def newPoll(self, message, args):

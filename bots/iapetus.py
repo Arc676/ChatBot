@@ -29,7 +29,14 @@ class Iapetus(CelestialBot):
 	def __init__(self):
 		super().__init__("Iapetus")
 		self.handleEverything = True
-		self.defaultCmd = self.printInfo
+		self.defaultCmd = self.checkReminder
+		self.help = """Commands available for Iapetus:
+countdown Event Name YYYY-MM-DD -- adds a new countdown with the given name and date to your list
+delete Event Name -- deletes all events with the given name from your countdowns
+list -- lists all your countdowns
+help -- shows this help message
+about -- shows information about Iapetus"""
+		self.about = "Iapetus is believed to be the Greek God of mortality. I share this name with one of Saturn's moons because my function is to provide a countdown to the inevitable."
 		self.commands.update({
 			"countdown" : self.addCountdown,
 			"list" : self.listCountdowns,
@@ -44,7 +51,7 @@ class Iapetus(CelestialBot):
 			pass
 
 	@asyncio.coroutine
-	def printInfo(self, message, args):
+	def checkReminder(self, message, args):
 		lastReminder = self.dbc.execute("SELECT date FROM lastReminder WHERE owner=?", (message.author.id,)).fetchone()
 		if lastReminder is not None:
 			lastReminder = tuple(lastReminder)[0]
@@ -53,12 +60,6 @@ class Iapetus(CelestialBot):
 				self.updateUserReminderDate(message.author)
 				if len(list(self.getUserCountdowns(message.author))) > 0:
 					yield from self.listCountdowns(message, args)
-		if not self.wasAddressed(message) or len(args) < 2:
-			return
-		if args[1] == "help":
-			yield from self.send_message(message.channel, "Available commands: countdown event_name YYYY-MM-DD, delete event_name, list, die, help, about")
-		elif args[1] == "about":
-			yield from self.send_message(message.channel, "Iapetus is believed to be the Greek God of mortality. I share this name with one of Saturn's moons because my function is to provide a countdown to the inevitable.")
 
 	@asyncio.coroutine
 	def addCountdown(self, message, args):

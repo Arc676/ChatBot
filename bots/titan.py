@@ -30,8 +30,14 @@ import sqlite3
 class Titan(CelestialBot):
 	def __init__(self):
 		super().__init__("Titan")
+		self.help = """Commands available for Titan
+start | kill | restart botname [botname ...] -- starts, terminates, or restarts the given bot(s); bot names cannot contain spaces
+register | unregister userID -- (un)registers the user with the given ID as a bot controller; only bot controllers can use Titan's functions
+list -- shows a list of all running bots and their PIDs
+help -- shows this help message
+about -- shows information about Titan"""
+		self.about = "I'm Titan, named after the largest of Saturn's moons. In Greek mythology, the Titans were a race of powerful deities"
 		self.commands.update({
-			"help" : self.printHelp,
 			"register" : self.registerController,
 			"unregister" : self.unregisterController,
 			"update" : self.updateRepo,
@@ -46,10 +52,6 @@ class Titan(CelestialBot):
 			self.dbc.execute("CREATE TABLE procs (botname text, pid INTEGER)")
 		except sqlite3.OperationalError:
 			pass
-
-	@asyncio.coroutine
-	def printHelp(self, message, args):
-		yield from self.send_message(message.channel, "Available commands: update, start|kill|restart bot_name [bot_name ...], register|unregister user_id, list, die")
 
 	@asyncio.coroutine
 	def updateRepo(self, message, args):
