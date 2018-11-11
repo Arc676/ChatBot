@@ -86,10 +86,11 @@ class Iapetus(CelestialBot):
 		if len(args) < 3:
 			return
 		event = " ".join(args[2:])
-		before = int(self.dbc.execute("SELECT COUNT(*) FROM dates WHERE name=?", (event,)).fetchone()[0])
-		self.dbc.execute("DELETE FROM dates WHERE name=?", (event,))
-		now = int(self.dbc.execute("SELECT COUNT(*) FROM dates WHERE name=?", (event,)).fetchone()[0])
-		if now - before < 0:
+		data = (event, message.author.id)
+		before = int(self.dbc.execute("SELECT COUNT(*) FROM dates WHERE name=? AND owner=?", data).fetchone()[0])
+		self.dbc.execute("DELETE FROM dates WHERE name=? AND owner=?", data)
+		now = int(self.dbc.execute("SELECT COUNT(*) FROM dates WHERE name=? AND owner=?", data).fetchone()[0])
+		if now < before:
 			yield from self.replyToMsg(message, "Deleted {0} countdown(s) named {1}".format(before - now, event))
 		else:
 			yield from self.replyToMsg(message, "Couldn't find an event with the given name")
@@ -131,7 +132,7 @@ class Iapetus(CelestialBot):
 		toDelete = len(pastEvents)
 		if toDelete > 0:
 			for eventData in pastEvents:
-				self.dbc.execute("DELETE FROM dates WHERE name=? and date=? and owner=?", eventData)
+				self.dbc.execute("DELETE FROM dates WHERE name=? AND date=? AND owner=?", eventData)
 			yield from self.replyToMsg(message, "Deleted {0} events that are either today or in the past".format(toDelete))
 
 	def updateUserReminderDate(self, user):
