@@ -50,8 +50,7 @@ about -- shows information about Iapetus"""
 		except sqlite3.OperationalError:
 			pass
 
-	@asyncio.coroutine
-	def checkReminder(self, message, args):
+	async def checkReminder(self, message, args):
 		lastReminder = self.dbc.execute("SELECT date FROM lastReminder WHERE owner=?", (message.author.id,)).fetchone()
 		if lastReminder is not None:
 			lastReminder = tuple(lastReminder)[0]
@@ -59,10 +58,9 @@ about -- shows information about Iapetus"""
 			if self.daysUntil(lastRemDate) < 0:
 				self.updateUserReminderDate(message.author)
 				if len(list(self.getUserCountdowns(message.author))) > 0:
-					yield from self.listCountdowns(message, args)
+					await self.listCountdowns(message, args)
 
-	@asyncio.coroutine
-	def addCountdown(self, message, args):
+	async def addCountdown(self, message, args):
 		if len(args) < 4:
 			return
 		try:
@@ -71,9 +69,9 @@ about -- shows information about Iapetus"""
 			ddate = datetime.datetime.strptime(date, "%Y-%m-%d").date()
 			remaining = self.daysUntil(ddate)
 			if remaining == 0:
-				yield from self.replyToMsg(message, "That's today!")
+				await self.replyToMsg(message, "That's today!")
 			elif remaining < 0:
-				yield from self.replyToMsg(message, "{0} was {1} days ago.".format(name, -remaining))
+				await self.replyToMsg(message, "{0} was {1} days ago.".format(name, -remaining))
 			else:
 				self.dbc.execute("INSERT INTO dates VALUES (?, ?, ?)", (name, date, message.author.id))
 
@@ -82,14 +80,13 @@ about -- shows information about Iapetus"""
 					today = datetime.date.today().isoformat()
 					self.dbc.execute("INSERT INTO lastReminder VALUES (?, ?)", (message.author.id, today))
 
-				yield from self.replyToMsg(message, "Added countdown for {0}. Only {1} day(s) to go!".format(name, self.daysUntil(ddate)))
+				await self.replyToMsg(message, "Added countdown for {0}. Only {1} day(s) to go!".format(name, self.daysUntil(ddate)))
 		except Exception as e:
 			print(e)
-			yield from self.replyToMsg(message, "Something went wrong parsing your request")
+			await self.replyToMsg(message, "Something went wrong parsing your request")
 		self.db.commit()
 
-	@asyncio.coroutine
-	def removeCountdown(self, message, args):
+	async def removeCountdown(self, message, args):
 		if len(args) < 3:
 			return
 		event = " ".join(args[2:])
@@ -98,13 +95,12 @@ about -- shows information about Iapetus"""
 		self.dbc.execute("DELETE FROM dates WHERE name=? AND owner=?", data)
 		now = int(self.dbc.execute("SELECT COUNT(*) FROM dates WHERE name=? AND owner=?", data).fetchone()[0])
 		if now < before:
-			yield from self.replyToMsg(message, "Deleted {0} countdown(s) named {1}".format(before - now, event))
+			await self.replyToMsg(message, "Deleted {0} countdown(s) named {1}".format(before - now, event))
 		else:
-			yield from self.replyToMsg(message, "Couldn't find an event with the given name")
+			await self.replyToMsg(message, "Couldn't find an event with the given name")
 		self.db.commit()
 
-	@asyncio.coroutine
-	def listCountdowns(self, message, args):
+	async def listCountdowns(self, message, args):
 		self.updateUserReminderDate(message.author)
 		events = self.getUserCountdowns(message.author)
 		count = 0
@@ -138,13 +134,13 @@ about -- shows information about Iapetus"""
 		if count == 0:
 			resp = "You have no countdowns"
 
-		yield from self.replyToMsg(message, resp)
+		await self.replyToMsg(message, resp)
 
 		toDelete = len(pastEvents)
 		if toDelete > 0:
 			for eventData in pastEvents:
 				self.dbc.execute("DELETE FROM dates WHERE name=? AND date=? AND owner=?", eventData)
-			yield from self.replyToMsg(message, "Deleted {0} events that are either today or in the past".format(toDelete))
+			await self.replyToMsg(message, "Deleted {0} events that are either today or in the past".format(toDelete))
 
 	def updateUserReminderDate(self, user):
 		now = datetime.date.today().isoformat()

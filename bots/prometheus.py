@@ -38,12 +38,11 @@ about -- shows information about prometheus"""
 			"fact" : self.replyWithFact
 		})
 
-	@asyncio.coroutine
-	def printInfo(self, message, args):
+	async def printInfo(self, message, args):
 		if args[1] == "1228":
-			yield from self.replyToMsg(message, "https://xkcd.com/1228/")
+			await self.replyToMsg(message, "https://xkcd.com/1228/")
 		elif args[1] == "1930":
-			yield from self.replyToMsg(message, "https://xkcd.com/1930/")
+			await self.replyToMsg(message, "https://xkcd.com/1930/")
 
 	@staticmethod
 	def pick(options):
@@ -145,10 +144,9 @@ about -- shows information about prometheus"""
 			])
 		)
 
-	@asyncio.coroutine
-	def replyWithFact(self, message, args):
+	async def replyWithFact(self, message, args):
 		fact = Prometheus.generateFact()
-		yield from self.replyToMsg(message, fact)
+		await self.replyToMsg(message, fact)
 
 if __name__ == "__main__":
 	bot = Prometheus()

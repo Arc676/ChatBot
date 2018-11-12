@@ -56,8 +56,7 @@ Queries are of the form 'property=value' e.g. 'name=Arc+Lightning'. Available pr
 			"limit" : self.setLimit
 		})
 
-	@asyncio.coroutine
-	def printCard(self, message, card):
+	async def printCard(self, message, card):
 		text = ""
 		for group in self.properties:
 			j = 0
@@ -68,7 +67,7 @@ Queries are of the form 'property=value' e.g. 'name=Arc+Lightning'. Available pr
 						text += "/"
 					j += 1
 			text += "\n"
-		yield from self.replyToMsg(message, text)
+		await self.replyToMsg(message, text)
 
 	def getQueryProperties(self, query):
 		properties = {}
@@ -80,17 +79,14 @@ Queries are of the form 'property=value' e.g. 'name=Arc+Lightning'. Available pr
 				return None
 		return properties
 
-	@asyncio.coroutine
-	def setLimit(self, message, args):
+	async def setLimit(self, message, args):
 		if len(args) >= 3:
 			self.resultLimit = int(args[2])
 
-	@asyncio.coroutine
-	def getHelp(self, message, args):
-		yield from self.replyToMsg(message, )
+	async def getHelp(self, message, args):
+		await self.replyToMsg(message, )
 
-	@asyncio.coroutine
-	def search(self, message, args):
+	async def search(self, message, args):
 		startIndex, endIndex = 0, 0
 		try:
 			startIndex = message.content.index("[[")
@@ -113,7 +109,7 @@ Queries are of the form 'property=value' e.g. 'name=Arc+Lightning'. Available pr
 				printImage = True
 			properties = self.getQueryProperties(query)
 			if properties is None:
-				yield from self.replyToMsg(message, "Sorry, your query failed")
+				await self.replyToMsg(message, "Sorry, your query failed")
 				return
 
 			# search for cards
@@ -123,20 +119,20 @@ Queries are of the form 'property=value' e.g. 'name=Arc+Lightning'. Available pr
 				if card.name not in distinct:
 					distinct[card.name] = card
 					found += 1
-			yield from self.replyToMsg(message, "Found {0} distinct card(s)".format(found))
+			await self.replyToMsg(message, "Found {0} distinct card(s)".format(found))
 			if found == 0:
 				return
 			elif found > self.resultLimit:
-				yield from self.replyToMsg(message, "Result count exceeds limit. Aborting.")
+				await self.replyToMsg(message, "Result count exceeds limit. Aborting.")
 				return
 			for name, card in distinct.items():
 				if printText:
-					yield from self.printCard(message, card)
+					await self.printCard(message, card)
 				if printImage and "image_url" in card.__dict__:
-					yield from self.replyToMsg(message, card.__dict__["image_url"])
+					await self.replyToMsg(message, card.__dict__["image_url"])
 				if debug:
 					print("Name: {0}; card: {1}".format(name, card.__dict__))
-			yield from self.replyToMsg(message, "End of search results")
+			await self.replyToMsg(message, "End of search results")
 
 if __name__ == "__main__":
 	bot = Titania()

@@ -33,8 +33,7 @@ class Deimos(CelestialBot):
 		self.help = "To run a script, the message must start with \"deimos\" and contain two code blocks with no language. The first code block should contain the script and the second the contents to be passed to `stdin`."
 		self.about = "I'm Deimos, named after the smaller and outermost of Mars' two moons. I execute Vongsprache scripts."
 
-	@asyncio.coroutine
-	def handle(self, message, args):
+	async def handle(self, message, args):
 		if self.wasAddressed(message):
 			try:
 				data = {}
@@ -42,9 +41,9 @@ class Deimos(CelestialBot):
 				data["script"] = blocks[1].strip()
 				data["input"] = blocks[3].strip() + "\n"
 				resp = self.evaluate(data)
-				yield from self.send_message(message.channel, "```{0}```".format(resp))
+				await self.send_message(message.channel, "```{0}```".format(resp))
 			except Exception as e:
-				yield from self.send_message(message.channel, "Malformed request. Exception:\n{0}".format(str(e)))
+				await self.send_message(message.channel, "Malformed request. Exception:\n{0}".format(str(e)))
 
 	def evaluate(self, data):
 		self.runningScripts += 1

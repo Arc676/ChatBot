@@ -36,9 +36,8 @@ class Pluto(CelestialBot):
 		self.qCount = len(self.allQuestions) - 1
 		self.defaultCmd = self.getQ
 
-	@asyncio.coroutine
-	def getQ(self, message, args):
-		yield from self.send_message(message.channel, "{0} {1}".format(message.author.mention, self.getRandomQuestion()))
+	async def getQ(self, message, args):
+		await self.send_message(message.channel, "{0} {1}".format(message.author.mention, self.getRandomQuestion()))
 
 	def getRandomQuestion(self):
 		return re.sub("([\*_])", r"\\\1", self.allQuestions[randint(0, self.qCount)])

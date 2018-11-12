@@ -37,31 +37,30 @@ help -- shows this help message
 about -- shows information about Nix"""
 		self.about = "Hi! My name is Nix, one of the moons of Pluto! Unlike Charon, I was discovered recently along with Kerberos, Hydra, and my fellow bot Styx. I'm named after the Greek embodiment of night and darkness, but the spelling was changed so I would not be confused for an asteroid named Nyx."
 
-	@asyncio.coroutine
-	def handle(self, message, args):
+	async def handle(self, message, args):
 		if "newgame" in args:
 			if len(args) != 4:
-				yield from self.replyToMsg(message, "Usage: nix newgame lowBound upBound")
+				await self.replyToMsg(message, "Usage: nix newgame lowBound upBound")
 				return
 			try:
 				lowerBound = int(args[2])
 				upperBound = int(args[3])
 				self.answers[message.author] = randint(lowerBound, upperBound)
-				yield from self.replyToMsg(message, "Alright, let's play!")
+				await self.replyToMsg(message, "Alright, let's play!")
 			except ValueError:
-				yield from self.replyToMsg(message, "Failed to parse arguments")
+				await self.replyToMsg(message, "Failed to parse arguments")
 		elif message.author in self.answers:
 			try:
 				guess = int(args[1])
 				if guess == self.answers[message.author]:
 					del self.answers[message.author]
-					yield from self.replyToMsg(message, "Correct")
+					await self.replyToMsg(message, "Correct")
 				elif guess < self.answers[message.author]:
-					yield from self.replyToMsg(message, "Too low")
+					await self.replyToMsg(message, "Too low")
 				else:
-					yield from self.replyToMsg(message, "Too high")
+					await self.replyToMsg(message, "Too high")
 			except ValueError:
-				yield from self.replyToMsg(message, "Failed to parse guess")
+				await self.replyToMsg(message, "Failed to parse guess")
 
 if __name__ == "__main__":
 	bot = Nix()

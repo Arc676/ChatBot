@@ -44,10 +44,9 @@ choose option1 option2 [option3 ...] -- randomly chooses between the options; th
 			"choose" : self.chooseFromList
 		})
 
-	@asyncio.coroutine
-	def newPoll(self, message, args):
+	async def newPoll(self, message, args):
 		if len(args) < 4:
-			yield from self.replyToMsg("Invalid request")
+			await self.replyToMsg("Invalid request")
 			return
 		pollname = args[2]
 		self.openPolls += 1
@@ -56,19 +55,18 @@ choose option1 option2 [option3 ...] -- randomly chooses between the options; th
 			"choices": args[3:],
 			"votes": {}
 		}
-		yield from self.replyToMsg(message, "Starting poll " + pollname)
+		await self.replyToMsg(message, "Starting poll " + pollname)
 
-	@asyncio.coroutine
-	def closePoll(self, message, args):
+	async def closePoll(self, message, args):
 		if len(args) < 3:
-			yield from self.replyToMsg(message, "Invalid request")
+			await self.replyToMsg(message, "Invalid request")
 			return
 		pollname = args[2]
 		if pollname not in self.polls:
-			yield from replyToMsg(message, "No such poll")
+			await replyToMsg(message, "No such poll")
 			return
 		if message.author != self.polls[pollname]["owner"]:
-			yield from self.replyToMsg(message, "You cannot close someone else's poll")
+			await self.replyToMsg(message, "You cannot close someone else's poll")
 			return
 		results = "Closing poll " + pollname + "\n"
 		self.openPolls -= 1
@@ -89,36 +87,33 @@ choose option1 option2 [option3 ...] -- randomly chooses between the options; th
 				count = voteCount[choice]
 				results += "{0}: {1} ({2}%)\n".format(choice, count, count * 100 // totalVotes)
 		del self.polls[pollname]
-		yield from self.replyToMsg(message, results)
+		await self.replyToMsg(message, results)
 
-	@asyncio.coroutine
-	def voteOnPoll(self, message, args):
+	async def voteOnPoll(self, message, args):
 		if len(args) < 4:
-			yield from self.replyToMsg(message, "Invalid vote")
+			await self.replyToMsg(message, "Invalid vote")
 			return
 		pollname = args[2]
 		if pollname not in self.polls:
-			yield from self.replyToMsg(message, "No such poll")
+			await self.replyToMsg(message, "No such poll")
 		if args[3] in self.polls[pollname]["choices"]:
 			self.polls[pollname]["votes"][message.author] = args[3]
-			yield from self.replyToMsg(message, "Thank you for casting your vote")
+			await self.replyToMsg(message, "Thank you for casting your vote")
 		else:
-			yield from self.replyToMsg(message, "Available options are: {0}".format(str(self.polls[pollname]["choices"])))
+			await self.replyToMsg(message, "Available options are: {0}".format(str(self.polls[pollname]["choices"])))
 
-	@asyncio.coroutine
-	def chooseFromList(self, message, args):
+	async def chooseFromList(self, message, args):
 		if len(args) < 4:
-			yield from self.replyToMsg(message, "Need at least 2 items to choose from")
+			await self.replyToMsg(message, "Need at least 2 items to choose from")
 			return
 		options = args[2:]
-		yield from self.replyToMsg(message, options[randint(0, len(options) - 1)])
+		await self.replyToMsg(message, options[randint(0, len(options) - 1)])
 
-	@asyncio.coroutine
-	def listPolls(self, message, args):
+	async def listPolls(self, message, args):
 		list = "Polls in progress:\n"
 		for pollname, poll in self.polls.items():
 			list += "{0} ({1})\n".format(pollname, poll["choices"])
-		yield from self.replyToMsg(message, list)
+		await self.replyToMsg(message, list)
 
 if __name__ == "__main__":
 	bot = Janus()

@@ -42,24 +42,22 @@ about -- shows information about Styx"""
 			"play" : self.startGame
 		})
 
-	@asyncio.coroutine
-	def handleGuess(self, message, args):
+	async def handleGuess(self, message, args):
 		user = message.author
 		if user in self.guess:
 			lowercase = [arg.lower() for arg in args]
 			if "low" in lowercase:
-				yield from self.computeGuess(message.channel, user, False)
+				await self.computeGuess(message.channel, user, False)
 			elif "high" in lowercase:
-				yield from self.computeGuess(message.channel, user, True)
+				await self.computeGuess(message.channel, user, True)
 			elif "correct" in lowercase:
 				del self.delta[user]
 				del self.guess[user]
-				yield from self.replyToMsg(message, "Yay!")
+				await self.replyToMsg(message, "Yay!")
 
-	@asyncio.coroutine
-	def startGame(self, message, args):
+	async def startGame(self, message, args):
 		if len(args) < 5:
-			yield from self.replyToMsg(message, "Usage: styx play username lowBound upBound [verbose]")
+			await self.replyToMsg(message, "Usage: styx play username lowBound upBound [verbose]")
 			return
 		user = message.author
 		if user.name != args[2]:
@@ -72,16 +70,15 @@ about -- shows information about Styx"""
 			high = int(args[4])
 			self.opponent[user] = args[2]
 			if len(args) > 5 and args[5] == "verbose":
-				yield from self.send_message(message.channel, "{0} newgame {1} {2}".format(self.opponent[user], low, high))
+				await self.send_message(message.channel, "{0} newgame {1} {2}".format(self.opponent[user], low, high))
 			self.guess[user] = (high - low) / 2 + low
 			self.delta[user] = self.guess[user] // 2
 			self.bounds[user] = [low, high]
-			yield from self.sendGuess(message.channel, user)
+			await self.sendGuess(message.channel, user)
 		except ValueError:
-			yield from self.replyToMsg(message, "Failed to parse values")
+			await self.replyToMsg(message, "Failed to parse values")
 
-	@asyncio.coroutine
-	def computeGuess(self, channel, user, wasHigh):
+	async def computeGuess(self, channel, user, wasHigh):
 		if self.guess[user] >= self.bounds[user][1] or self.guess[user] <= self.bounds[user][0]:
 			channel.send(self.opponent[user] + ", you've been giving me contradictory information")
 			return
@@ -93,11 +90,10 @@ about -- shows information about Styx"""
 			self.guess[user] += self.delta[user]
 		if self.delta[user] > 1:
 			self.delta[user] //= 2
-		yield from self.sendGuess(channel, user)
+		await self.sendGuess(channel, user)
 
-	@asyncio.coroutine
-	def sendGuess(self, channel, user):
-		yield from self.send_message(channel, "{0} {1}".format(self.opponent[user], int(self.guess[user])))
+	async def sendGuess(self, channel, user):
+		await self.send_message(channel, "{0} {1}".format(self.opponent[user], int(self.guess[user])))
 
 if __name__ == "__main__":
 	bot = Styx()

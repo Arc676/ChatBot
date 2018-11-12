@@ -36,8 +36,7 @@ class Charon(CelestialBot):
 		self.aCount = len(self.allAnswers) - 1
 		self.defaultCmd = self.getA
 
-	@asyncio.coroutine
-	def getA(self, message, args):
+	async def getA(self, message, args):
 		times = 1
 		if len(args) > 1:
 			try:
@@ -47,7 +46,7 @@ class Charon(CelestialBot):
 		answer = ""
 		for i in range(times):
 			answer += self.getRandomAnswer()
-		yield from self.send_message(message.channel, "{0} {1}".format(message.author.mention, answer.rstrip()))
+		await self.send_message(message.channel, "{0} {1}".format(message.author.mention, answer.rstrip()))
 
 	def getRandomAnswer(self):
 		return re.sub("([\*_])", r"\\\1", self.allAnswers[randint(0, self.aCount)])

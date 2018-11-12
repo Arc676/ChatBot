@@ -53,54 +53,47 @@ about -- shows information about Titan"""
 		except sqlite3.OperationalError:
 			pass
 
-	@asyncio.coroutine
-	def updateRepo(self, message, args):
-		yield from self.send_message(message.channel, self.update())
+	async def updateRepo(self, message, args):
+		await self.send_message(message.channel, self.update())
 
-	@asyncio.coroutine
-	def launchBot(self, message, args):
+	async def launchBot(self, message, args):
 		for bot in args[2:]:
 			if self.isValidBotName(bot):
-				yield from self.send_message(message.channel, self.startBot(bot))
+				await self.send_message(message.channel, self.startBot(bot))
 			else:
-				yield from self.send_message(message.channel, "Illegal bot name")
+				await self.send_message(message.channel, "Illegal bot name")
 		self.db.commit()
 
-	@asyncio.coroutine
-	def kill(self, message, args):
+	async def kill(self, message, args):
 		for bot in args[2:]:
-			yield from self.send_message(message.channel, self.terminateBot(bot))
+			await self.send_message(message.channel, self.terminateBot(bot))
 		self.pollProcs()
 		self.db.commit()
 
-	@asyncio.coroutine
-	def restart(self, message, args):
+	async def restart(self, message, args):
 		for bot in args[2:]:
 			if self.isValidBotName(bot):
 				resp = self.terminateBot(bot) + "\n"
 				resp += self.startBot(bot)
-				yield from self.send_message(message.channel, resp)
+				await self.send_message(message.channel, resp)
 			else:
-				yield from self.send_message(message.channel, "Illegal bot name")
+				await self.send_message(message.channel, "Illegal bot name")
 
-	@asyncio.coroutine
-	def listBots(self, message, args):
+	async def listBots(self, message, args):
 		self.pollProcs()
 		resp = "Running bots:\n{0}".format(
 			"\n".join([(lambda x: "Name: {0}, PID: {1}".format(x[0], x[1]))(tuple(record))
 				for record in self.dbc.execute("SELECT * FROM procs")])
 		)
-		yield from self.send_message(message.channel, resp)
+		await self.send_message(message.channel, resp)
 
-	@asyncio.coroutine
-	def registerController(self, message, args):
+	async def registerController(self, message, args):
 		file = open(".botcontrollers", "a")
 		file.write("\n{0}".format(args[2]))
 		file.close()
-		yield from self.send_message(message.channel, "Registered user ID {0} as bot controller".format(args[2]))
+		await self.send_message(message.channel, "Registered user ID {0} as bot controller".format(args[2]))
 
-	@asyncio.coroutine
-	def unregisterController(self, message, args):
+	async def unregisterController(self, message, args):
 		file = open(".botcontrollers", "r")
 		controllers = file.readlines()
 		file.close()
@@ -109,7 +102,7 @@ about -- shows information about Titan"""
 		for controller in controllers:
 			file.write(controller)
 		file.close()
-		yield from self.send_message(message.channel, "Removed user ID {0} from bot controllers".format(args[2]))
+		await self.send_message(message.channel, "Removed user ID {0} from bot controllers".format(args[2]))
 
 	def isValidBotName(self, botname):
 		return not re.search("[^a-zA-Z]", botname)

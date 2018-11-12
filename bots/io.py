@@ -58,27 +58,26 @@ about -- shows information about Io
 Io also responds to various movie quotes and assorted phrases."""
 		self.about = "Hi, My name is Io, one of the Galilean moons of Jupiter!  I was discovered by Galileo in a telescope he built, and am the 3rd most massive of Jupiter's 69 moons.  One of my most notable feature is Tvashtar, a giant volcano."
 
-	@asyncio.coroutine
-	def handle(self, message, args):
+	async def handle(self, message, args):
 		if not self.active:
 			if message.content.lower() == "io come back":
 				self.active = True
-				yield from self.replyToMsg(message, "I'm back")
+				await self.replyToMsg(message, "I'm back")
 			return
 		if message.content.lower() == self.name.lower():
-			yield from self.replyToMsg(message, "Hi there!")
+			await self.replyToMsg(message, "Hi there!")
 		elif message.content.startswith(self.name):
 			if message.content.endswith(" go away"): # Makes chatbot leave
 				self.active = False
-				yield from self.replyToMsg(message, "OK :(")
+				await self.replyToMsg(message, "OK :(")
 			elif message.content.endswith(" rtfm"):
-				yield from self.replyToMsg(message, "Follow your own advice: https://github.com/Rapptz/discord.py")
+				await self.replyToMsg(message, "Follow your own advice: https://github.com/Rapptz/discord.py")
 			else:
-				yield from self.replyToMsg(message, "Yes?")
+				await self.replyToMsg(message, "Yes?")
 		else: # Runs commands and performs call and response
 			response = self.getReply(message.content)
 			if response is not None:
-				yield from self.replyToMsg(message, response)
+				await self.replyToMsg(message, response)
 
 	def getReply(self, msg):
 		# Loop through array and get the appropriate response to the call

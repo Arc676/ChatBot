@@ -57,18 +57,15 @@ class CelestialBot(discord.Client):
 			"about" : self.showAbout
 		}
 
-	@asyncio.coroutine
-	def showHelp(self, message, args):
-		yield from self.send_message(message.channel, self.help)
+	async def showHelp(self, message, args):
+		await self.send_message(message.channel, self.help)
 
-	@asyncio.coroutine
-	def showAbout(self, message, args):
-		yield from self.send_message(message.channel, self.about)
+	async def showAbout(self, message, args):
+		await self.send_message(message.channel, self.about)
 
-	@asyncio.coroutine
-	def killBot(self, message, args):
+	async def killBot(self, message, args):
 		if self.isBotController(message.author) and (not self.handleEverything or self.wasAddressed(message)):
-			yield from self.logout()
+			await self.logout()
 
 	def isBotController(self, author):
 		file = open(".botcontrollers", "r")
@@ -95,17 +92,14 @@ class CelestialBot(discord.Client):
 		elif self.handleEverything:
 			return self.defaultCmd
 
-	@asyncio.coroutine
-	def replyToMsg(self, msgObj, msg):
-		yield from self.send_message(msgObj.channel, "{0} {1}".format(msgObj.author.mention, msg))
+	async def replyToMsg(self, msgObj, msg):
+		await self.send_message(msgObj.channel, "{0} {1}".format(msgObj.author.mention, msg))
 
-	@asyncio.coroutine
-	def on_ready(self):
+	async def on_ready(self):
 		print("Logged in as " + self.user.name)
 
-	@asyncio.coroutine
-	def on_message(self, message):
+	async def on_message(self, message):
 		args = message.content.split()
 		handler = self.getHandler(message, args)
 		if handler is not None:
-			yield from handler(message, args)
+			await handler(message, args)
