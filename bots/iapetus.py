@@ -69,14 +69,20 @@ about -- shows information about Iapetus"""
 			name = " ".join(args[2:-1])
 			date = args[-1]
 			ddate = datetime.datetime.strptime(date, "%Y-%m-%d").date()
-			self.dbc.execute("INSERT INTO dates VALUES (?, ?, ?)", (name, date, message.author.id))
+			remaining = self.daysUntil(ddate)
+			if remaining == 0:
+				yield from self.replyToMsg(message, "That's today!")
+			elif remaining < 0:
+				yield from self.replyToMsg(message, "{0} was {1} days ago.".format(name, -remaining))
+			else:
+				self.dbc.execute("INSERT INTO dates VALUES (?, ?, ?)", (name, date, message.author.id))
 
-			# check if user has an entry in lastReminder
-			if self.dbc.execute("SELECT * FROM lastReminder WHERE owner=?", (message.author.id,)).fetchone() is None:
-				today = datetime.date.today().isoformat()
-				self.dbc.execute("INSERT INTO lastReminder VALUES (?, ?)", (message.author.id, today))
+				# check if user has an entry in lastReminder
+				if self.dbc.execute("SELECT * FROM lastReminder WHERE owner=?", (message.author.id,)).fetchone() is None:
+					today = datetime.date.today().isoformat()
+					self.dbc.execute("INSERT INTO lastReminder VALUES (?, ?)", (message.author.id, today))
 
-			yield from self.replyToMsg(message, "Added countdown for {0}. Only {1} day(s) to go!".format(name, self.daysUntil(ddate)))
+				yield from self.replyToMsg(message, "Added countdown for {0}. Only {1} day(s) to go!".format(name, self.daysUntil(ddate)))
 		except Exception as e:
 			print(e)
 			yield from self.replyToMsg(message, "Something went wrong parsing your request")
@@ -106,6 +112,7 @@ about -- shows information about Iapetus"""
 
 		resp = "Your countdowns:"
 		today = ""
+		past = ""
 		for event in events:
 			count += 1
 			data = tuple(event)
@@ -116,14 +123,17 @@ about -- shows information about Iapetus"""
 
 			if remaining == 0:
 				today += "\n{0} is today!".format(name)
+				pastEvents.append(data)
+			elif remaining < 0:
+				past += "\n{0} was {1} days ago".format(name, -remaining)
+				pastEvents.append(data)
 			else:
 				resp += "\nDays until {0}: {1}".format(name, remaining)
 
-			if remaining <= 0:
-				pastEvents.append(data)
-
 		if today != "":
 			resp += "\n{0}".format(today)
+		if past != "":
+			resp += "\n{0}".format(past)
 
 		if count == 0:
 			resp = "You have no countdowns"
