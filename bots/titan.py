@@ -29,13 +29,12 @@ import sqlite3
 
 class Titan(CelestialBot):
 	def __init__(self):
-		super().__init__("Titan")
-		self.help = """Commands available for Titan
-start | kill | restart botname [botname ...] -- starts, terminates, or restarts the given bot(s); bot names cannot contain spaces
-register | unregister userID -- (un)registers the user with the given ID as a bot controller; only bot controllers can use Titan's functions
-list -- shows a list of all running bots and their PIDs
-help -- shows this help message
-about -- shows information about Titan"""
+		super().__init__("Titan", color=0xD3C171)
+		self.buildHelp({
+			"start | kill | restart botname [botname ...]" : "Starts, terminates, or restarts the given bot(s); bot names cannot contain spaces",
+			"register | unregister userID" : "(Un)registers the user with the given ID as a bot controller; only bot controllers can use Titan's functions",
+			"list" : "Shows a list of all running bots and their PIDs"
+		})
 		self.about = "I'm Titan, named after the largest of Saturn's moons. In Greek mythology, the Titans were a race of powerful deities"
 		self.commands.update({
 			"register" : self.registerController,
@@ -54,19 +53,19 @@ about -- shows information about Titan"""
 			pass
 
 	async def updateRepo(self, message, args):
-		await self.send_message(message.channel, self.update())
+		await self.reply(message, self.update())
 
 	async def launchBot(self, message, args):
 		for bot in args[2:]:
 			if self.isValidBotName(bot):
-				await self.send_message(message.channel, self.startBot(bot))
+				await self.reply(message, self.startBot(bot))
 			else:
-				await self.send_message(message.channel, "Illegal bot name")
+				await self.reply(message, "Illegal bot name")
 		self.db.commit()
 
 	async def kill(self, message, args):
 		for bot in args[2:]:
-			await self.send_message(message.channel, self.terminateBot(bot))
+			await self.reply(message, self.terminateBot(bot))
 		self.pollProcs()
 		self.db.commit()
 
@@ -75,9 +74,9 @@ about -- shows information about Titan"""
 			if self.isValidBotName(bot):
 				resp = self.terminateBot(bot) + "\n"
 				resp += self.startBot(bot)
-				await self.send_message(message.channel, resp)
+				await self.reply(message, resp)
 			else:
-				await self.send_message(message.channel, "Illegal bot name")
+				await self.reply(message, "Illegal bot name")
 
 	async def listBots(self, message, args):
 		self.pollProcs()
@@ -85,13 +84,13 @@ about -- shows information about Titan"""
 			"\n".join([(lambda x: "Name: {0}, PID: {1}".format(x[0], x[1]))(tuple(record))
 				for record in self.dbc.execute("SELECT * FROM procs")])
 		)
-		await self.send_message(message.channel, resp)
+		await self.reply(message, resp)
 
 	async def registerController(self, message, args):
 		file = open(".botcontrollers", "a")
 		file.write("\n{0}".format(args[2]))
 		file.close()
-		await self.send_message(message.channel, "Registered user ID {0} as bot controller".format(args[2]))
+		await self.reply(message, "Registered user ID {0} as bot controller".format(args[2]))
 
 	async def unregisterController(self, message, args):
 		file = open(".botcontrollers", "r")
@@ -102,7 +101,7 @@ about -- shows information about Titan"""
 		for controller in controllers:
 			file.write(controller)
 		file.close()
-		await self.send_message(message.channel, "Removed user ID {0} from bot controllers".format(args[2]))
+		await self.reply(message, "Removed user ID {0} from bot controllers".format(args[2]))
 
 	def isValidBotName(self, botname):
 		return not re.search("[^a-zA-Z]", botname)

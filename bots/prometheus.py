@@ -26,13 +26,12 @@ import asyncio
 
 class Prometheus(CelestialBot):
 	def __init__(self):
-		super().__init__("Prometheus")
+		super().__init__("Prometheus", color=0xFF8D32)
 		self.defaultCmd = self.printInfo
-		self.help = """Commands available for Prometheus
-fact -- generates a random calendar fact from the options available in xkcd 1930
-1228 | 1930 -- provides a link to the xkcd comic with the given number, both of which are related to Prometheus' functionality
-help -- shows this help message
-about -- shows information about prometheus"""
+		self.buildHelp({
+			"fact" : "Generates a random calendar fact from the options available in xkcd 1930",
+			"1228 | 1930" : "Provides a link to the xkcd comic with the given number, both of which are related to Prometheus' functionality"
+		})
 		self.about = "Hi! My name is Prometheus. I'm one of Saturn's satellites. The picture on my profile was taken by Cassini. I'm named after the Greek Titan who created humans from clay and stole fire from the Gods. Prometheus also featured on xkcd 1228."
 		self.commands.update({
 			"fact" : self.replyWithFact
@@ -40,9 +39,9 @@ about -- shows information about prometheus"""
 
 	async def printInfo(self, message, args):
 		if args[1] == "1228":
-			await self.replyToMsg(message, "https://xkcd.com/1228/")
+			await self.reply(message, "https://xkcd.com/1228/", reply=True)
 		elif args[1] == "1930":
-			await self.replyToMsg(message, "https://xkcd.com/1930/")
+			await self.reply(message, "https://xkcd.com/1930/", reply=True)
 
 	@staticmethod
 	def pick(options):
@@ -146,7 +145,7 @@ about -- shows information about prometheus"""
 
 	async def replyWithFact(self, message, args):
 		fact = Prometheus.generateFact()
-		await self.replyToMsg(message, fact)
+		await self.reply(message, fact, reply=True)
 
 if __name__ == "__main__":
 	bot = Prometheus()

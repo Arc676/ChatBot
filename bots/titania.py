@@ -44,11 +44,11 @@ class Titania(CelestialBot):
 	]
 
 	def __init__(self):
-		super().__init__("Titania")
+		super().__init__("Titania", color=0x117350)
 		self.resultLimit = 10
 		self.handleEverything = True
 		self.defaultCmd = self.search
-		self.help = """Put queries in [[double brackets]]. Separate search parameters with spaces. Replace spaces within search parameters with plus signs.
+		self.help.description = """Put queries in [[double brackets]]. Separate search parameters with spaces. Replace spaces within search parameters with plus signs.
 
 Queries are of the form 'property=value' e.g. 'name=Arc+Lightning'. Available properties include 'name', 'cmc', 'set' (three letter abbreviation), 'type', and more. Some properties cannot be searched for due to limitations in the API e.g. 'manaCost'. An example suitable search message might be [[name=bolt cmc=1 type=instant]]"""
 		self.about = "I'm Titania, named after the largest of Uranus' moons and the queen of the fairies in Shakespeare's _A Midsummer Night's Dream_. Titania is also the name of a creature in Magic the Gathering."
@@ -67,7 +67,7 @@ Queries are of the form 'property=value' e.g. 'name=Arc+Lightning'. Available pr
 						text += "/"
 					j += 1
 			text += "\n"
-		await self.replyToMsg(message, text)
+		await self.reply(message, text, reply=True)
 
 	def getQueryProperties(self, query):
 		properties = {}
@@ -82,9 +82,6 @@ Queries are of the form 'property=value' e.g. 'name=Arc+Lightning'. Available pr
 	async def setLimit(self, message, args):
 		if len(args) >= 3:
 			self.resultLimit = int(args[2])
-
-	async def getHelp(self, message, args):
-		await self.replyToMsg(message, )
 
 	async def search(self, message, args):
 		startIndex, endIndex = 0, 0
@@ -109,7 +106,7 @@ Queries are of the form 'property=value' e.g. 'name=Arc+Lightning'. Available pr
 				printImage = True
 			properties = self.getQueryProperties(query)
 			if properties is None:
-				await self.replyToMsg(message, "Sorry, your query failed")
+				await self.reply(message, "Sorry, your query failed", reply=True)
 				return
 
 			# search for cards
@@ -119,20 +116,20 @@ Queries are of the form 'property=value' e.g. 'name=Arc+Lightning'. Available pr
 				if card.name not in distinct:
 					distinct[card.name] = card
 					found += 1
-			await self.replyToMsg(message, "Found {0} distinct card(s)".format(found))
+			await self.reply(message, "Found {0} distinct card(s)".format(found), reply=True)
 			if found == 0:
 				return
 			elif found > self.resultLimit:
-				await self.replyToMsg(message, "Result count exceeds limit. Aborting.")
+				await self.reply(message, "Result count exceeds limit. Aborting.", reply=True)
 				return
 			for name, card in distinct.items():
 				if printText:
 					await self.printCard(message, card)
 				if printImage and "image_url" in card.__dict__:
-					await self.replyToMsg(message, card.__dict__["image_url"])
+					await self.reply(message, card.__dict__["image_url"], reply=True)
 				if debug:
 					print("Name: {0}; card: {1}".format(name, card.__dict__))
-			await self.replyToMsg(message, "End of search results")
+			await self.reply(message, "End of search results", reply=True)
 
 if __name__ == "__main__":
 	bot = Titania()

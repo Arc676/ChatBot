@@ -27,15 +27,16 @@ import sqlite3
 
 class Iapetus(CelestialBot):
 	def __init__(self):
-		super().__init__("Iapetus")
+		super().__init__("Iapetus", color=0x01796F)
 		self.handleEverything = True
 		self.defaultCmd = self.checkReminder
-		self.help = """Commands available for Iapetus:
-countdown Event Name YYYY-MM-DD -- adds a new countdown with the given name and date to your list
-delete Event Name -- deletes all events with the given name from your countdowns
-list -- lists all your countdowns
-help -- shows this help message
-about -- shows information about Iapetus"""
+		self.buildHelp({
+			"countdown Event Name YYYY-MM-DD" : "adds a new countdown with the given name and date to your list",
+			"delete Event Name" : "deletes all events with the given name from your countdowns",
+			"list" : "lists all your countdowns",
+			"help" : "shows this help message",
+			"about" : "shows information about Iapetus"
+		})
 		self.about = "Iapetus is believed to be the Greek God of mortality. I share this name with one of Saturn's moons because my function is to provide a countdown to the inevitable."
 		self.commands.update({
 			"countdown" : self.addCountdown,
@@ -69,9 +70,9 @@ about -- shows information about Iapetus"""
 			ddate = datetime.datetime.strptime(date, "%Y-%m-%d").date()
 			remaining = self.daysUntil(ddate)
 			if remaining == 0:
-				await self.replyToMsg(message, "That's today!")
+				await self.reply(message, "That's today!", reply=True)
 			elif remaining < 0:
-				await self.replyToMsg(message, "{0} was {1} days ago.".format(name, -remaining))
+				await self.reply(message, "{0} was {1} days ago.".format(name, -remaining), reply=True)
 			else:
 				self.dbc.execute("INSERT INTO dates VALUES (?, ?, ?)", (name, date, message.author.id))
 
@@ -80,10 +81,10 @@ about -- shows information about Iapetus"""
 					today = datetime.date.today().isoformat()
 					self.dbc.execute("INSERT INTO lastReminder VALUES (?, ?)", (message.author.id, today))
 
-				await self.replyToMsg(message, "Added countdown for {0}. Only {1} day(s) to go!".format(name, self.daysUntil(ddate)))
+				await self.reply(message, "Added countdown for {0}. Only {1} day(s) to go!".format(name, self.daysUntil(ddate)), reply=True)
 		except Exception as e:
 			print(e)
-			await self.replyToMsg(message, "Something went wrong parsing your request")
+			await self.reply(message, "Something went wrong parsing your request", reply=True)
 		self.db.commit()
 
 	async def removeCountdown(self, message, args):
@@ -95,9 +96,9 @@ about -- shows information about Iapetus"""
 		self.dbc.execute("DELETE FROM dates WHERE name=? AND owner=?", data)
 		now = int(self.dbc.execute("SELECT COUNT(*) FROM dates WHERE name=? AND owner=?", data).fetchone()[0])
 		if now < before:
-			await self.replyToMsg(message, "Deleted {0} countdown(s) named {1}".format(before - now, event))
+			await self.reply(message, "Deleted {0} countdown(s) named {1}".format(before - now, event), reply=True)
 		else:
-			await self.replyToMsg(message, "Couldn't find an event with the given name")
+			await self.reply(message, "Couldn't find an event with the given name", reply=True)
 		self.db.commit()
 
 	async def listCountdowns(self, message, args):
@@ -134,13 +135,13 @@ about -- shows information about Iapetus"""
 		if count == 0:
 			resp = "You have no countdowns"
 
-		await self.replyToMsg(message, resp)
+		await self.reply(message, resp, reply=True)
 
 		toDelete = len(pastEvents)
 		if toDelete > 0:
 			for eventData in pastEvents:
 				self.dbc.execute("DELETE FROM dates WHERE name=? AND date=? AND owner=?", eventData)
-			await self.replyToMsg(message, "Deleted {0} events that are either today or in the past".format(toDelete))
+			await self.reply(message, "Deleted {0} events that are either today or in the past".format(toDelete), reply=True)
 
 	def updateUserReminderDate(self, user):
 		now = datetime.date.today().isoformat()

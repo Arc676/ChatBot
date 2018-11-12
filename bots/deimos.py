@@ -27,10 +27,10 @@ from pathlib import Path
 
 class Deimos(CelestialBot):
 	def __init__(self):
-		super().__init__("Deimos")
+		super().__init__("Deimos", color=0xFFFF00)
 		self.runningScripts = 0
 		self.defaultCmd = self.handle
-		self.help = "To run a script, the message must start with \"deimos\" and contain two code blocks with no language. The first code block should contain the script and the second the contents to be passed to `stdin`."
+		self.help.description = "To run a script, the message must start with \"deimos\" and contain two code blocks with no language. The first code block should contain the script and the second the contents to be passed to `stdin`."
 		self.about = "I'm Deimos, named after the smaller and outermost of Mars' two moons. I execute Vongsprache scripts."
 
 	async def handle(self, message, args):
@@ -41,9 +41,9 @@ class Deimos(CelestialBot):
 				data["script"] = blocks[1].strip()
 				data["input"] = blocks[3].strip() + "\n"
 				resp = self.evaluate(data)
-				await self.send_message(message.channel, "```{0}```".format(resp))
+				await self.reply(message, "```{0}```".format(resp))
 			except Exception as e:
-				await self.send_message(message.channel, "Malformed request. Exception:\n{0}".format(str(e)))
+				await self.reply(message, "Malformed request. Exception:\n{0}".format(str(e)))
 
 	def evaluate(self, data):
 		self.runningScripts += 1

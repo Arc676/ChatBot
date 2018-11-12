@@ -44,40 +44,38 @@ class Io(CelestialBot):
 	]
 
 	def __init__(self):
-		super().__init__("Io")
+		super().__init__("Io", color=0xFF9300)
 		self.active = True
 		self.defaultCmd = self.handle
 		self.handleEverything = True
-		self.help = """Commands available for Io
-go away -- deactivates Io until called back
-come back -- reactivates Io
-rtfm -- provides a link to the repository for the Discord API module
-help -- shows this help message
-about -- shows information about Io
-
-Io also responds to various movie quotes and assorted phrases."""
+		self.buildHelp({
+			"go away" : "Deactivates Io until called back",
+			"come back" : "Reactivates Io",
+			"rtfm" : "Provides a link to the repository for the Discord API module",
+			"(assorted)" : "Io also responds to various movie quotes and assorted phrases."
+		})
 		self.about = "Hi, My name is Io, one of the Galilean moons of Jupiter!  I was discovered by Galileo in a telescope he built, and am the 3rd most massive of Jupiter's 69 moons.  One of my most notable feature is Tvashtar, a giant volcano."
 
 	async def handle(self, message, args):
 		if not self.active:
 			if message.content.lower() == "io come back":
 				self.active = True
-				await self.replyToMsg(message, "I'm back")
+				await self.reply(message, "I'm back", reply=True)
 			return
 		if message.content.lower() == self.name.lower():
-			await self.replyToMsg(message, "Hi there!")
-		elif message.content.startswith(self.name):
+			await self.reply(message, "Hi there!", reply=True)
+		elif self.wasAddressed(message):
 			if message.content.endswith(" go away"): # Makes chatbot leave
 				self.active = False
-				await self.replyToMsg(message, "OK :(")
+				await self.reply(message, "OK :(", reply=True)
 			elif message.content.endswith(" rtfm"):
-				await self.replyToMsg(message, "Follow your own advice: https://github.com/Rapptz/discord.py")
+				await self.reply(message, "Follow your own advice: https://github.com/Rapptz/discord.py", reply=True)
 			else:
-				await self.replyToMsg(message, "Yes?")
+				await self.reply(message, "Yes?", reply=True)
 		else: # Runs commands and performs call and response
 			response = self.getReply(message.content)
 			if response is not None:
-				await self.replyToMsg(message, response)
+				await self.reply(message, response, reply=True)
 
 	def getReply(self, msg):
 		# Loop through array and get the appropriate response to the call

@@ -26,41 +26,40 @@ from random import randint
 
 class Nix(CelestialBot):
 	def __init__(self):
-		super().__init__("Nix")
+		super().__init__("Nix", color=0xB86B81)
 		self.answers = {}
 		self.allowBotControl = True
 		self.defaultCmd = self.handle
-		self.help = """Commands available for Nix
-newgame lowerBound upperBound -- starts a new number guess game with the answer lying between the given bounds
-[a number] -- guess the number and Nix will provide feedback
-help -- shows this help message
-about -- shows information about Nix"""
+		self.buildHelp({
+			"newgame lowerBound upperBound" : "starts a new number guess game with the answer lying between the given bounds",
+			"[a number]" : "guess the number and Nix will provide feedback"
+		})
 		self.about = "Hi! My name is Nix, one of the moons of Pluto! Unlike Charon, I was discovered recently along with Kerberos, Hydra, and my fellow bot Styx. I'm named after the Greek embodiment of night and darkness, but the spelling was changed so I would not be confused for an asteroid named Nyx."
 
 	async def handle(self, message, args):
 		if "newgame" in args:
 			if len(args) != 4:
-				await self.replyToMsg(message, "Usage: nix newgame lowBound upBound")
+				await self.reply(message, "Usage: nix newgame lowBound upBound", reply=True)
 				return
 			try:
 				lowerBound = int(args[2])
 				upperBound = int(args[3])
 				self.answers[message.author] = randint(lowerBound, upperBound)
-				await self.replyToMsg(message, "Alright, let's play!")
+				await self.reply(message, "Alright, let's play!", reply=True)
 			except ValueError:
-				await self.replyToMsg(message, "Failed to parse arguments")
+				await self.reply(message, "Failed to parse arguments", reply=True)
 		elif message.author in self.answers:
 			try:
 				guess = int(args[1])
 				if guess == self.answers[message.author]:
 					del self.answers[message.author]
-					await self.replyToMsg(message, "Correct")
+					await self.reply(message, "Correct", reply=True)
 				elif guess < self.answers[message.author]:
-					await self.replyToMsg(message, "Too low")
+					await self.reply(message, "Too low", reply=True)
 				else:
-					await self.replyToMsg(message, "Too high")
+					await self.reply(message, "Too high", reply=True)
 			except ValueError:
-				await self.replyToMsg(message, "Failed to parse guess")
+				await self.reply(message, "Failed to parse guess", reply=True)
 
 if __name__ == "__main__":
 	bot = Nix()

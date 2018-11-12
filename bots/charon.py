@@ -27,8 +27,8 @@ from random import randint
 
 class Charon(CelestialBot):
 	def __init__(self):
-		super().__init__("Charon")
-		self.help = "Type my name to get a random CAH answer. Optionally, add a number after my name to get that many answers at once"
+		super().__init__("Charon", color=0xBB0000)
+		self.help.description = "Type my name to get a random CAH answer. Optionally, add a number after my name to get that many answers at once"
 		self.about = "I'm Charon, named after the largest of Pluto's moons. Charon is the ferryman of the dead in Greek mythology."
 		file = open("CAH/answers.txt", "r", encoding="utf-8")
 		self.allAnswers = file.readlines()
@@ -46,7 +46,7 @@ class Charon(CelestialBot):
 		answer = ""
 		for i in range(times):
 			answer += self.getRandomAnswer()
-		await self.send_message(message.channel, "{0} {1}".format(message.author.mention, answer.rstrip()))
+		await self.reply(message, answer.rstrip(), reply=True)
 
 	def getRandomAnswer(self):
 		return re.sub("([\*_])", r"\\\1", self.allAnswers[randint(0, self.aCount)])

@@ -31,7 +31,7 @@ def signal_handler(sig, frame):
 	asyncio.ensure_future(instance.logout()).__await__()
 
 class CelestialBot(discord.Client):
-	def __init__(self, name):
+	def __init__(self, name, color=0xFFFF):
 		"""Initializes a new bot
 
 		Args:
@@ -46,7 +46,10 @@ class CelestialBot(discord.Client):
 
 		# bot properties
 		self.name = name
-		self.help = "No help available"
+		self.color = color
+		self.help = discord.Embed(title="Commands available for {0}".format(name), colour=self.color)
+		self.help.add_field(name="help", value="Shows this help message", inline=False)
+		self.help.add_field(name="about", value="Shows information about {0}".format(name), inline=False)
 		self.about = "No bot description available"
 		self.allowBotControl = False
 		self.defaultCmd = None
@@ -58,10 +61,10 @@ class CelestialBot(discord.Client):
 		}
 
 	async def showHelp(self, message, args):
-		await self.send_message(message.channel, self.help)
+		await self.reply(message, embed=self.help)
 
 	async def showAbout(self, message, args):
-		await self.send_message(message.channel, self.about)
+		await self.reply(message, self.about)
 
 	async def killBot(self, message, args):
 		if self.isBotController(message.author) and (not self.handleEverything or self.wasAddressed(message)):
@@ -82,6 +85,10 @@ class CelestialBot(discord.Client):
 		file.close()
 		return token
 
+	def buildHelp(self, cmds):
+		for cmd, desc in cmds.items():
+			self.help.add_field(name=cmd, value=desc, inline=False)
+
 	def getHandler(self, message, args):
 		if message.author.bot and not self.allowBotControl:
 			return None
@@ -92,8 +99,8 @@ class CelestialBot(discord.Client):
 		elif self.handleEverything:
 			return self.defaultCmd
 
-	async def replyToMsg(self, msgObj, msg):
-		await self.send_message(msgObj.channel, "{0} {1}".format(msgObj.author.mention, msg))
+	async def reply(self, msgObj, msg='\u200b', embed=None, reply=False):
+		await self.send_message(msgObj.channel, "{0} {1}".format(msgObj.author.mention if reply else "", msg).strip(), embed=embed)
 
 	async def on_ready(self):
 		print("Logged in as " + self.user.name)

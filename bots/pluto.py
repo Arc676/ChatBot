@@ -27,8 +27,8 @@ from random import randint
 
 class Pluto(CelestialBot):
 	def __init__(self):
-		super().__init__("Pluto")
-		self.help = "Type my name to get a random CAH question."
+		super().__init__("Pluto", color=0xFF6200)
+		self.help.description = "Type my name to get a random CAH question."
 		self.about = "Pluto is a dwarf planet in our Solar System. It used to be a planet, but got demoted in 2006 after the International Astronomical Union formally defined the word 'planet' due to the increasingly large number of similarly sized objects being discovered in the Kuiper Belt and being classified as planets. In classical mythology, Pluto is the God of the Underworld."
 		file = open("CAH/questions.txt", "r", encoding="utf-8")
 		self.allQuestions = file.readlines()
@@ -37,7 +37,7 @@ class Pluto(CelestialBot):
 		self.defaultCmd = self.getQ
 
 	async def getQ(self, message, args):
-		await self.send_message(message.channel, "{0} {1}".format(message.author.mention, self.getRandomQuestion()))
+		await self.reply(message, self.getRandomQuestion(), reply=True)
 
 	def getRandomQuestion(self):
 		return re.sub("([\*_])", r"\\\1", self.allQuestions[randint(0, self.qCount)])
