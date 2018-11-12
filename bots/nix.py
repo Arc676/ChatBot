@@ -31,8 +31,8 @@ class Nix(CelestialBot):
 		self.allowBotControl = True
 		self.defaultCmd = self.handle
 		self.buildHelp({
-			"newgame lowerBound upperBound" : "starts a new number guess game with the answer lying between the given bounds",
-			"[a number]" : "guess the number and Nix will provide feedback"
+			"newgame lowerBound upperBound" : "Starts a new number guess game with the answer lying between the given bounds",
+			"[a number]" : "Guess the number and Nix will provide feedback"
 		})
 		self.about = "Hi! My name is Nix, one of the moons of Pluto! Unlike Charon, I was discovered recently along with Kerberos, Hydra, and my fellow bot Styx. I'm named after the Greek embodiment of night and darkness, but the spelling was changed so I would not be confused for an asteroid named Nyx."
 

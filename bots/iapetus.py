@@ -21,6 +21,7 @@
 # SOFTWARE.
 
 from bot import CelestialBot
+from discord import Embed
 import asyncio
 import datetime
 import sqlite3
@@ -31,15 +32,13 @@ class Iapetus(CelestialBot):
 		self.handleEverything = True
 		self.defaultCmd = self.checkReminder
 		self.buildHelp({
-			"countdown Event Name YYYY-MM-DD" : "adds a new countdown with the given name and date to your list",
-			"delete Event Name" : "deletes all events with the given name from your countdowns",
-			"list" : "lists all your countdowns",
-			"help" : "shows this help message",
-			"about" : "shows information about Iapetus"
+			"add Event Name YYYY-MM-DD" : "Adds a new countdown with the given name and date to your list",
+			"delete Event Name" : "Deletes all events with the given name from your countdowns",
+			"list" : "Lists all your countdowns"
 		})
 		self.about = "Iapetus is believed to be the Greek God of mortality. I share this name with one of Saturn's moons because my function is to provide a countdown to the inevitable."
 		self.commands.update({
-			"countdown" : self.addCountdown,
+			"add" : self.addCountdown,
 			"list" : self.listCountdowns,
 			"delete" : self.removeCountdown
 		})
@@ -107,8 +106,9 @@ class Iapetus(CelestialBot):
 		count = 0
 		pastEvents = []
 
-		resp = "Your countdowns:"
-		today = ""
+		resp = Embed(title="{0}'s countdowns".format(message.author.name), color=0x01796F)
+		desc = "Nothing happening today. "
+		today = []
 		past = ""
 		for event in events:
 			count += 1
@@ -119,23 +119,27 @@ class Iapetus(CelestialBot):
 			remaining = self.daysUntil(date)
 
 			if remaining == 0:
-				today += "\n{0} is today!".format(name)
+				today.append(name)
 				pastEvents.append(data)
 			elif remaining < 0:
-				past += "\n{0} was {1} days ago".format(name, -remaining)
+				past += "{0} was {1} days ago. ".format(name, -remaining)
 				pastEvents.append(data)
 			else:
-				resp += "\nDays until {0}: {1}".format(name, remaining)
+				resp.add_field(name=name, value="{0} days to go!".format(remaining), inline=False)
 
-		if today != "":
-			resp += "\n{0}".format(today)
+		if len(today) > 0:
+			desc = "{0} {1} today! ".format(
+				", ".join(today),
+				"is" if len(today) == 1 else "are"
+			)
 		if past != "":
-			resp += "\n{0}".format(past)
+			desc += past
 
 		if count == 0:
-			resp = "You have no countdowns"
+			desc = "You have no countdowns"
 
-		await self.reply(message, resp, reply=True)
+		resp.description = desc
+		await self.reply(message, embed=resp)
 
 		toDelete = len(pastEvents)
 		if toDelete > 0:

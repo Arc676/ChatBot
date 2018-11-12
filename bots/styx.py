@@ -32,9 +32,9 @@ class Styx(CelestialBot):
 		self.guess = {}
 		self.bounds = {}
 		self.defaultCmd = self.handleGuess
-		self.buildHelp){
-			"play username lowerBound upperBound [verbose]" : "starts a new game against the specified user with the given bounds; if verbose is set, Styx will send a separate message to start the game (to be used if Styx is to play against Nix)",
-			"low | correct | high" : "provide feedback for Styx' guess (the word needs to be contained in the message)"
+		self.buildHelp({
+			"play username lowerBound upperBound [verbose]" : "Starts a new game against the specified user with the given bounds; if verbose is set, Styx will send a separate message to start the game (to be used if Styx is to play against Nix)",
+			"low | correct | high" : "Provide feedback for Styx' guess (the word needs to be contained in the message)"
 		})
 		self.about = "Hi, I'm Styx! I'm one of the smaller moons of Pluto. I'm so small that I'm more of an oblong potato than a sphere! I'm named after the river in the Greek underworld that made Achilles invulnerable - except for his heel of course."
 		self.commands.update({
