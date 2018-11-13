@@ -47,17 +47,18 @@ Queries are of the form 'property=value' e.g. 'name=Arc+Lightning'. Available pr
 			card.__dict__["rarity"],
 			", ".join(card.__dict__["types"])
 		))
-		if "image_url" in card.__dict__:
+		if card.__dict__["image_url"] is not None:
 			resp.set_thumbnail(url=card.__dict__["image_url"])
 		resp.add_field(name="Mana Cost", value=card.__dict__["mana_cost"], inline=False)
-		resp.add_field(name="Supertypes", value=", ".join(card.__dict__["supertypes"]), inline=False)
-		resp.add_field(name="Subtypes", value=", ".join(card.__dict__["subtypes"]), inline=False)
+		if card.__dict__["supertypes"] is not None:
+			resp.add_field(name="Supertypes", value=", ".join(card.__dict__["supertypes"]), inline=False)
+			resp.add_field(name="Subtypes", value=", ".join(card.__dict__["subtypes"]), inline=False)
 		resp.add_field(name="Oracle Text", value=card.__dict__["text"], inline=False)
 		if card.__dict__["power"] is not None:
 			resp.add_field(name="P/T", value="{0}/{1}".format(
 				card.__dict__["power"], card.__dict__["toughness"]
 			), inline=False)
-		else:
+		elif card.__dict__["loyalty"] is not None:
 			resp.add_field(name="Initial Loyalty", value=card.__dict__["loyalty"], inline=False)
 		await self.reply(message, embed=resp)
 
