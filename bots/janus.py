@@ -21,6 +21,7 @@
 # SOFTWARE.
 
 from bot import CelestialBot
+from discord import Embed
 import asyncio
 from random import randint
 
@@ -69,7 +70,7 @@ class Janus(CelestialBot):
 		if message.author != self.polls[pollname]["owner"]:
 			await self.reply(message, "You cannot close someone else's poll", reply=True)
 			return
-		results = "Closing poll " + pollname + "\n"
+		results = Embed(title="Closing poll {0}".format(pollname), color=self.color)
 		self.openPolls -= 1
 		totalVotes = 0
 		voteCount = {}
@@ -80,15 +81,15 @@ class Janus(CelestialBot):
 			else:
 				voteCount[chosen] = 1
 		if totalVotes == 0:
-			results += "Nobody voted"
+			results.description = "Nobody voted"
 		else:
 			for choice in self.polls[pollname]["choices"]:
 				if choice not in voteCount:
 					voteCount[choice] = 0
 				count = voteCount[choice]
-				results += "{0}: {1} ({2}%)\n".format(choice, count, count * 100 // totalVotes)
+				results.add_field(name=choice, value="{0} ({1}%)".format(count, count * 100 // totalVotes), inline=False)
 		del self.polls[pollname]
-		await self.reply(message, results, reply=True)
+		await self.reply(message, embed=results, reply=True)
 
 	async def voteOnPoll(self, message, args):
 		if len(args) < 4:

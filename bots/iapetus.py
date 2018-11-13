@@ -71,7 +71,7 @@ class Iapetus(CelestialBot):
 			if remaining == 0:
 				await self.reply(message, "That's today!", reply=True)
 			elif remaining < 0:
-				await self.reply(message, "{0} was {1} days ago.".format(name, -remaining), reply=True)
+				await self.reply(message, "{0} was {1} day(s) ago.".format(name, -remaining), reply=True)
 			else:
 				self.dbc.execute("INSERT INTO dates VALUES (?, ?, ?)", (name, date, message.author.id))
 
@@ -106,7 +106,7 @@ class Iapetus(CelestialBot):
 		count = 0
 		pastEvents = []
 
-		resp = Embed(title="{0}'s countdowns".format(message.author.name), color=0x01796F)
+		resp = Embed(title="{0}'s countdowns".format(message.author.name), color=self.color)
 		desc = "Nothing happening today. "
 		today = []
 		past = ""
@@ -122,10 +122,10 @@ class Iapetus(CelestialBot):
 				today.append(name)
 				pastEvents.append(data)
 			elif remaining < 0:
-				past += "{0} was {1} days ago. ".format(name, -remaining)
+				past += "{0} was {1} day(s) ago. ".format(name, -remaining)
 				pastEvents.append(data)
 			else:
-				resp.add_field(name=name, value="{0} days to go!".format(remaining), inline=False)
+				resp.add_field(name=name, value="{0} day(s) to go!".format(remaining), inline=False)
 
 		if len(today) > 0:
 			desc = "{0} {1} today! ".format(

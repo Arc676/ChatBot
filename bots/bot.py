@@ -47,7 +47,7 @@ class CelestialBot(discord.Client):
 		# bot properties
 		self.name = name
 		self.color = color
-		self.help = discord.Embed(title="Commands available for {0}".format(name), colour=self.color)
+		self.help = discord.Embed(title="Commands available for {0}".format(name), color=self.color)
 		self.help.add_field(name="help", value="Shows this help message", inline=False)
 		self.help.add_field(name="about", value="Shows information about {0}".format(name), inline=False)
 		self.about = "No bot description available"

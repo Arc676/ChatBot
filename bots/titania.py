@@ -21,28 +21,11 @@
 # SOFTWARE.
 
 from bot import CelestialBot
+from discord import Embed
 import asyncio
 from mtgsdk import Card
 
 class Titania(CelestialBot):
-	properties = [
-		[
-			"name",
-			"mana_cost"
-		],
-		[
-			"rarity",
-			"types"
-		],
-		[
-			"text"
-		],
-		[
-			"power",
-			"toughness"
-		]
-	]
-
 	def __init__(self):
 		super().__init__("Titania", color=0x117350)
 		self.resultLimit = 10
@@ -51,23 +34,32 @@ class Titania(CelestialBot):
 		self.help.description = """Put queries in [[double brackets]]. Separate search parameters with spaces. Replace spaces within search parameters with plus signs.
 
 Queries are of the form 'property=value' e.g. 'name=Arc+Lightning'. Available properties include 'name', 'cmc', 'set' (three letter abbreviation), 'type', and more. Some properties cannot be searched for due to limitations in the API e.g. 'manaCost'. An example suitable search message might be [[name=bolt cmc=1 type=instant]]"""
+		self.buildHelp({
+			"limit" : "Sets the limit on how many cards should be printed for any query"
+		})
 		self.about = "I'm Titania, named after the largest of Uranus' moons and the queen of the fairies in Shakespeare's _A Midsummer Night's Dream_. Titania is also the name of a creature in Magic the Gathering."
 		self.commands.update({
 			"limit" : self.setLimit
 		})
 
 	async def printCard(self, message, card):
-		text = ""
-		for group in self.properties:
-			j = 0
-			for prop in group:
-				if prop in card.__dict__:
-					text += str(card.__dict__[prop])
-					if j + 1 < len(group):
-						text += "/"
-					j += 1
-			text += "\n"
-		await self.reply(message, text, reply=True)
+		resp = Embed(title=card.__dict__["name"], color=self.color, description="{0}/{1}".format(
+			card.__dict__["rarity"],
+			", ".join(card.__dict__["types"])
+		))
+		if "image_url" in card.__dict__:
+			resp.set_thumbnail(url=card.__dict__["image_url"])
+		resp.add_field(name="Mana Cost", value=card.__dict__["mana_cost"], inline=False)
+		resp.add_field(name="Supertypes", value=", ".join(card.__dict__["supertypes"]), inline=False)
+		resp.add_field(name="Subtypes", value=", ".join(card.__dict__["subtypes"]), inline=False)
+		resp.add_field(name="Oracle Text", value=card.__dict__["text"], inline=False)
+		if card.__dict__["power"] is not None:
+			resp.add_field(name="P/T", value="{0}/{1}".format(
+				card.__dict__["power"], card.__dict__["toughness"]
+			), inline=False)
+		else:
+			resp.add_field(name="Initial Loyalty", value=card.__dict__["loyalty"], inline=False)
+		await self.reply(message, embed=resp)
 
 	def getQueryProperties(self, query):
 		properties = {}
@@ -94,16 +86,9 @@ Queries are of the form 'property=value' e.g. 'name=Arc+Lightning'. Available pr
 			query = message.content[startIndex + 2:endIndex].split()
 			if len(query) == 0:
 				return
-			printText = True
-			printImage = False
 			debug = False
 			if message.content.startswith("debug"):
 				debug = True
-			elif message.content.startswith("image"):
-				printImage = True
-				printText = False
-			elif message.content.startswith("combo"):
-				printImage = True
 			properties = self.getQueryProperties(query)
 			if properties is None:
 				await self.reply(message, "Sorry, your query failed", reply=True)
@@ -123,13 +108,9 @@ Queries are of the form 'property=value' e.g. 'name=Arc+Lightning'. Available pr
 				await self.reply(message, "Result count exceeds limit. Aborting.", reply=True)
 				return
 			for name, card in distinct.items():
-				if printText:
-					await self.printCard(message, card)
-				if printImage and "image_url" in card.__dict__:
-					await self.reply(message, card.__dict__["image_url"], reply=True)
 				if debug:
 					print("Name: {0}; card: {1}".format(name, card.__dict__))
-			await self.reply(message, "End of search results", reply=True)
+				await self.printCard(message, card)
 
 if __name__ == "__main__":
 	bot = Titania()
