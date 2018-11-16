@@ -43,23 +43,23 @@ Queries are of the form 'property=value' e.g. 'name=Arc+Lightning'. Available pr
 		})
 
 	async def printCard(self, message, card):
-		resp = Embed(title=card.__dict__["name"], color=self.color, description="{0}/{1}".format(
-			card.__dict__["rarity"],
-			", ".join(card.__dict__["types"])
+		resp = Embed(title=card.name, color=self.color, description="{0}/{1}".format(
+			card.rarity,
+			", ".join(card.types)
 		))
-		if card.__dict__["image_url"] is not None:
-			resp.set_thumbnail(url=card.__dict__["image_url"])
-		resp.add_field(name="Mana Cost", value=card.__dict__["mana_cost"], inline=False)
-		if card.__dict__["supertypes"] is not None:
-			resp.add_field(name="Supertypes", value=", ".join(card.__dict__["supertypes"]), inline=False)
-			resp.add_field(name="Subtypes", value=", ".join(card.__dict__["subtypes"]), inline=False)
-		resp.add_field(name="Oracle Text", value=card.__dict__["text"], inline=False)
-		if card.__dict__["power"] is not None:
+		if card.image_url is not None:
+			resp.set_thumbnail(url=card.image_url)
+		resp.add_field(name="Mana Cost", value=card.mana_cost, inline=False)
+		if card.supertypes is not None:
+			resp.add_field(name="Supertypes", value=", ".join(card.supertypes), inline=False)
+			resp.add_field(name="Subtypes", value=", ".join(card.subtypes), inline=False)
+		resp.add_field(name="Oracle Text", value=card.text, inline=False)
+		if card.power is not None:
 			resp.add_field(name="P/T", value="{0}/{1}".format(
-				card.__dict__["power"], card.__dict__["toughness"]
+				card.power, card.toughness
 			), inline=False)
-		elif card.__dict__["loyalty"] is not None:
-			resp.add_field(name="Initial Loyalty", value=card.__dict__["loyalty"], inline=False)
+		elif card.loyalty is not None:
+			resp.add_field(name="Initial Loyalty", value=card.loyalty, inline=False)
 		await self.reply(message, embed=resp)
 
 	def getQueryProperties(self, query):
@@ -102,6 +102,8 @@ Queries are of the form 'property=value' e.g. 'name=Arc+Lightning'. Available pr
 				if card.name not in distinct:
 					distinct[card.name] = card
 					found += 1
+				if distinct[card.name].image_url is None and card.image_url is not None:
+					distinct[card.name] = card
 			await self.reply(message, "Found {0} distinct card(s)".format(found), reply=True)
 			if found == 0:
 				return
