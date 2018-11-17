@@ -57,9 +57,11 @@ Iapetus
 - Provides a countdown service by determining the number of days to a given date
 
 ## System Requirements:
+
 Python 3.4 or later. See the requirements for [the Discord API](https://github.com/Rapptz/discord.py) and the [MTG SDK](https://github.com/MagicTheGathering/mtg-sdk-python) for more details on required Python packages.
 
-## Instructions for running:
+## Included scripts and utilities
+
 The directory containing the bots must look like this (assuming you don't modify the scripts).
 ```
 /path/to/dir
@@ -72,6 +74,8 @@ The script will run `python3` with the specified script in the background.
 The bots folder contains the bot scripts.
 
 The tokens folder contains files named `botname.token` containing the secret token of the app with **NO TRAILING NEWLINE**. These tokens are not included in this repository (because then you could impersonate our bots).
+
+The `restartbots` script checks if any bots have died and restarts them. This can be added to a cron job to ensure maximum uptime in case any bots die due to unexpectedly terminated connections.
 
 ## Legal
 

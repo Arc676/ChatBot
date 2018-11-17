@@ -5,3 +5,4 @@ input*
 script*
 __pycache__
 *.db
+logs/

@@ -6,5 +6,5 @@ if [ $# -lt 1 ]; then
 fi
 for bot in "$@"; do
 	echo Waking $bot
-	python3 bots/$bot.py & disown
+	python3 bots/$bot.py > logs/$bot.log 2>&1 & disown
 done
