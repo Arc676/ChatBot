@@ -34,11 +34,13 @@ class Iapetus(CelestialBot):
 		self.buildHelp({
 			"add Event Name YYYY-MM-DD" : "Adds a new countdown with the given name and date to your list",
 			"delete Event Name" : "Deletes all events with the given name from your countdowns",
+			"delay Days" : "Sets the number of days between automatic reminders; default is daily (1); you'll always be reminded if you send a message on the day of an event",
 			"list" : "Lists all your countdowns"
 		})
 		self.about = "Iapetus is believed to be the Greek God of mortality. I share this name with one of Saturn's moons because my function is to provide a countdown to the inevitable."
 		self.commands.update({
 			"add" : self.addCountdown,
+			"delay" : self.setDelay,
 			"list" : self.listCountdowns,
 			"delete" : self.removeCountdown
 		})
@@ -46,16 +48,31 @@ class Iapetus(CelestialBot):
 		self.dbc = self.db.cursor()
 		try:
 			self.dbc.execute("CREATE TABLE dates (name text, date text, owner text)")
-			self.dbc.execute("CREATE TABLE lastReminder (owner text, date text)")
+			self.dbc.execute("CREATE TABLE lastReminder (owner text, date text, delay number)")
 		except sqlite3.OperationalError:
 			pass
 
+	async def setDelay(self, message, args):
+		try:
+			delay = 1 - int(args[2])
+			self.dbc.execute("UPDATE lastReminder SET delay=? WHERE owner=?", (delay, message.author.id))
+			self.db.commit()
+		except Exception as e:
+			await self.reply(message, "Something went wrong parsing your request: ```{0}```".format(str(e)), reply=True)
+
 	async def checkReminder(self, message, args):
-		lastReminder = self.dbc.execute("SELECT date FROM lastReminder WHERE owner=?", (message.author.id,)).fetchone()
+		lastReminder = self.dbc.execute("SELECT date, delay FROM lastReminder WHERE owner=?", (message.author.id,)).fetchone()
 		if lastReminder is not None:
-			lastReminder = tuple(lastReminder)[0]
+			# check when last reminder was issued
+			lastReminder, delay = tuple(lastReminder)
 			lastRemDate = datetime.datetime.strptime(str(lastReminder), "%Y-%m-%d").date()
-			if self.daysUntil(lastRemDate) < 0:
+			daysSinceRem = self.daysUntil(lastRemDate)
+
+			# check if any events are today
+			now = datetime.date.today().isoformat()
+			eventToday = self.dbc.execute("SELECT * FROM dates WHERE owner=? AND date=?", (message.author.id, now)).fetchone()
+
+			if (daysSinceRem < delay) or (daysSinceRem < 0 and eventToday is not None):
 				self.updateUserReminderDate(message.author)
 				if len(list(self.getUserCountdowns(message.author))) > 0:
 					await self.listCountdowns(message, args)
@@ -78,12 +95,11 @@ class Iapetus(CelestialBot):
 				# check if user has an entry in lastReminder
 				if self.dbc.execute("SELECT * FROM lastReminder WHERE owner=?", (message.author.id,)).fetchone() is None:
 					today = datetime.date.today().isoformat()
-					self.dbc.execute("INSERT INTO lastReminder VALUES (?, ?)", (message.author.id, today))
+					self.dbc.execute("INSERT INTO lastReminder VALUES (?, ?, 0)", (message.author.id, today))
 
 				await self.reply(message, "Added countdown for {0}. Only {1} day(s) to go!".format(name, self.daysUntil(ddate)), reply=True)
 		except Exception as e:
-			print(e)
-			await self.reply(message, "Something went wrong parsing your request", reply=True)
+			await self.reply(message, "Something went wrong parsing your request: ```{0}```".format(str(e)), reply=True)
 		self.db.commit()
 
 	async def removeCountdown(self, message, args):
@@ -153,7 +169,7 @@ class Iapetus(CelestialBot):
 		self.db.commit()
 
 	def getUserCountdowns(self, user):
-		return self.dbc.execute("SELECT * FROM dates WHERE owner=?", (user.id,))
+		return self.dbc.execute("SELECT * FROM dates WHERE owner=? ORDER BY date", (user.id,))
 
 	def daysUntil(self, date):
 		return (date - datetime.date.today()).days
