@@ -53,6 +53,12 @@ class Iapetus(CelestialBot):
 			pass
 
 	async def setDelay(self, message, args):
+		"""Sets the delay for a given user
+
+		Args:
+			message: Message object
+			args: Message content split by whitespace
+		"""
 		try:
 			delay = 1 - int(args[2])
 			self.dbc.execute("UPDATE lastReminder SET delay=? WHERE owner=?", (delay, message.author.id))
@@ -61,6 +67,12 @@ class Iapetus(CelestialBot):
 			await self.reply(message, "Something went wrong parsing your request: ```{0}```".format(str(e)), reply=True)
 
 	async def checkReminder(self, message, args):
+		"""Checks when a user was last reminded of their countdowns and reminds them if necessary
+
+		Args:
+			message: Message object
+			args: Message content split by whitespace
+		"""
 		lastReminder = self.dbc.execute("SELECT date, delay FROM lastReminder WHERE owner=?", (message.author.id,)).fetchone()
 		if lastReminder is not None:
 			# check when last reminder was issued
@@ -78,6 +90,12 @@ class Iapetus(CelestialBot):
 					await self.listCountdowns(message, args)
 
 	async def addCountdown(self, message, args):
+		"""Adds a countdown to the database
+
+		Args:
+			message: Message object
+			args: Message content split by whitespace
+		"""
 		if len(args) < 4:
 			return
 		try:
@@ -103,6 +121,12 @@ class Iapetus(CelestialBot):
 		self.db.commit()
 
 	async def removeCountdown(self, message, args):
+		"""Deletes countdowns matching a given name and belonging to a given user from the database
+
+		Args:
+			message: Message object
+			args: Message content split by whitespace
+		"""
 		if len(args) < 3:
 			return
 		event = " ".join(args[2:])
@@ -117,6 +141,12 @@ class Iapetus(CelestialBot):
 		self.db.commit()
 
 	async def listCountdowns(self, message, args):
+		"""Lists all the countdowns belonging to the author of a given message
+
+		Args:
+			message: Message object
+			args: Message content split by whitespace
+		"""
 		self.updateUserReminderDate(message.author)
 		events = self.getUserCountdowns(message.author)
 		count = 0
@@ -164,14 +194,35 @@ class Iapetus(CelestialBot):
 			await self.reply(message, "Deleted {0} events that are either today or in the past".format(toDelete), reply=True)
 
 	def updateUserReminderDate(self, user):
+		"""Sets the current date as the last time a given user was reminded of their countdowns
+
+		Args:
+			user: User whose reminder date to update
+		"""
 		now = datetime.date.today().isoformat()
 		self.dbc.execute("UPDATE lastReminder SET date=? WHERE owner=?", (now, user.id))
 		self.db.commit()
 
 	def getUserCountdowns(self, user):
+		"""Gets a user's countdowns
+
+		Args:
+			user: User whose countdowns to get from database
+
+		Return:
+			Generator with all the given user's countdowns
+		"""
 		return self.dbc.execute("SELECT * FROM dates WHERE owner=? ORDER BY date", (user.id,))
 
 	def daysUntil(self, date):
+		"""Determines the number of days until a given date
+
+		Args:
+			date: Date to check
+
+		Return:
+			Number of days from today to the given day
+		"""
 		return (date - datetime.date.today()).days
 
 if __name__ == "__main__":

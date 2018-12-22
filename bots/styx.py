@@ -42,6 +42,12 @@ class Styx(CelestialBot):
 		})
 
 	async def handleGuess(self, message, args):
+		"""Default message handler for user responses to guesses
+
+		Args:
+			message: Message object
+			args: Message content split by whitespace
+		"""
 		user = message.author
 		if user in self.guess:
 			lowercase = [arg.lower() for arg in args]
@@ -55,6 +61,12 @@ class Styx(CelestialBot):
 				await self.reply(message, "Yay!", reply=True)
 
 	async def startGame(self, message, args):
+		"""Starts a new game
+
+		Args:
+			message: Message object
+			args: Message content split by whitespace
+		"""
 		if len(args) < 5:
 			await self.reply(message, "Usage: styx play username lowBound upBound [verbose]", reply=True)
 			return
@@ -78,6 +90,12 @@ class Styx(CelestialBot):
 			await self.reply(message, "Failed to parse values", reply=True)
 
 	async def computeGuess(self, message, wasHigh):
+		"""Determines the next guess for a user's number
+
+		Args:
+			message: Message object
+			wasHigh: Whether Styx' last guess was higher than the user's number
+		"""
 		user = message.author
 		if self.guess[user] >= self.bounds[user][1] or self.guess[user] <= self.bounds[user][0]:
 			self.reply(message, self.opponent[user] + ", you've been giving me contradictory information")
@@ -93,6 +111,12 @@ class Styx(CelestialBot):
 		await self.sendGuess(message, user)
 
 	async def sendGuess(self, message, user):
+		"""Sends a message with the next number to guess for a given user's number
+
+		Args:
+			message: Message object (to which to reply)
+			user: User whose number is being guessed
+		"""
 		await self.reply(message, "{0} {1}".format(self.opponent[user], int(self.guess[user])))
 
 if __name__ == "__main__":

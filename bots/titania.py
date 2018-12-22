@@ -43,6 +43,12 @@ Queries are of the form 'property=value' e.g. 'name=Arc+Lightning'. Available pr
 		})
 
 	async def printCard(self, message, card):
+		"""Builds an embed with a given card's data and replies to a given message with it
+
+		Args:
+			message: Message object
+			card: Card object
+		"""
 		resp = Embed(title=card.name, color=self.color, description="{0}/{1}".format(
 			card.rarity,
 			", ".join(card.types)
@@ -63,6 +69,14 @@ Queries are of the form 'property=value' e.g. 'name=Arc+Lightning'. Available pr
 		await self.reply(message, embed=resp)
 
 	def getQueryProperties(self, query):
+		"""Builds a search query from a message
+
+		Args:
+			query: Array of desired card properties
+
+		Return:
+			kwargs'able dictionary to use as a search query for cards
+		"""
 		properties = {}
 		for param in query:
 			prop = param.split("=")
@@ -73,10 +87,22 @@ Queries are of the form 'property=value' e.g. 'name=Arc+Lightning'. Available pr
 		return properties
 
 	async def setLimit(self, message, args):
+		"""Sets the maximum number of cards to be printed at once
+
+		Args:
+			message: Message object
+			args: Message content split by whitespace
+		"""
 		if len(args) >= 3:
 			self.resultLimit = int(args[2])
 
 	async def search(self, message, args):
+		"""Searches for cards matching the query in a message
+
+		Args:
+			message: Message object
+			args: Message content split by whitespace
+		"""
 		startIndex, endIndex = 0, 0
 		try:
 			startIndex = message.content.index("[[")

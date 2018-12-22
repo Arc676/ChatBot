@@ -38,6 +38,12 @@ class Prometheus(CelestialBot):
 		})
 
 	async def printInfo(self, message, args):
+		"""Replies with a link to an xkcd comic relevant to Prometheus, if requested
+
+		Args:
+			message: Message object
+			args: Message content split by whitespace
+		"""
 		if args[1] == "1228":
 			await self.reply(message, "https://xkcd.com/1228/", reply=True)
 		elif args[1] == "1930":
@@ -45,10 +51,23 @@ class Prometheus(CelestialBot):
 
 	@staticmethod
 	def pick(options):
+		"""Randomly picks an item from a list
+
+		Args:
+			options: Items from which to pick
+
+		Return:
+			Random item from the given list
+		"""
 		return options[randint(0, len(options) - 1)]
 
 	@staticmethod
 	def generateFact():
+		"""Generates a new calendar fact
+
+		Return:
+			Newly generated calendar fact
+		"""
 		return "Did you know that {0} {1} because of {2}? Apparently {3}. While it may seem like trivia, it {4}.".format(
 			Prometheus.pick([
 				"the {0} equinox".format(
@@ -144,6 +163,12 @@ class Prometheus(CelestialBot):
 		)
 
 	async def replyWithFact(self, message, args):
+		"""Replies to a message with a random calendar fact
+
+		Args:
+			message: Message object
+			args: Message content split by whitespace
+		"""
 		fact = Prometheus.generateFact()
 		await self.reply(message, fact, reply=True)
 

@@ -37,6 +37,12 @@ class Nix(CelestialBot):
 		self.about = "Hi! My name is Nix, one of the moons of Pluto! Unlike Charon, I was discovered recently along with Kerberos, Hydra, and my fellow bot Styx. I'm named after the Greek embodiment of night and darkness, but the spelling was changed so I would not be confused for an asteroid named Nyx."
 
 	async def handle(self, message, args):
+		"""Default message handler
+
+		Args:
+			message: Message object
+			args: Message content split by whitespace
+		"""
 		if "newgame" in args:
 			if len(args) != 4:
 				await self.reply(message, "Usage: nix newgame lowBound upBound", reply=True)

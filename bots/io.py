@@ -57,6 +57,12 @@ class Io(CelestialBot):
 		self.about = "Hi, My name is Io, one of the Galilean moons of Jupiter!  I was discovered by Galileo in a telescope he built, and am the 3rd most massive of Jupiter's 69 moons.  One of my most notable feature is Tvashtar, a giant volcano."
 
 	async def handle(self, message, args):
+		"""Default message handler
+
+		Args:
+			message: Message object
+			args: Message content split by whitespace
+		"""
 		if not self.active:
 			if message.content.lower() == "io come back":
 				self.active = True
@@ -78,6 +84,14 @@ class Io(CelestialBot):
 				await self.reply(message, response, reply=True)
 
 	def getReply(self, msg):
+		"""Gets the appropriate reply for a message
+
+		Args:
+			msg: Message text
+
+		Return:
+			A response to the message, if any
+		"""
 		# Loop through array and get the appropriate response to the call
 		for call, response in self.callAndResponse:
 			match = re.search(call, msg, re.I)

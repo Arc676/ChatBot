@@ -37,6 +37,12 @@ class Charon(CelestialBot):
 		self.defaultCmd = self.getA
 
 	async def getA(self, message, args):
+		"""Replies to a message with a random CAH answer
+
+		Args:
+			message: Message object
+			args: Message content split by whitespace
+		"""
 		times = 1
 		if len(args) > 1:
 			try:
@@ -49,6 +55,11 @@ class Charon(CelestialBot):
 		await self.reply(message, answer.rstrip(), reply=True)
 
 	def getRandomAnswer(self):
+		"""Obtains a random answer from the pool of CAH answers
+
+		Return:
+			Random answer from the CAH file
+		"""
 		return re.sub("([\*_])", r"\\\1", self.allAnswers[randint(0, self.aCount)])
 
 if __name__ == "__main__":

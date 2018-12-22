@@ -47,6 +47,12 @@ class Janus(CelestialBot):
 		})
 
 	async def newPoll(self, message, args):
+		"""Creates a new poll
+
+		Args:
+			message: Message object
+			args: Message content split by whitespace
+		"""
 		if len(args) < 4:
 			await self.reply("Invalid request", reply=True)
 			return
@@ -60,6 +66,12 @@ class Janus(CelestialBot):
 		await self.reply(message, "Starting poll " + pollname, reply=True)
 
 	async def closePoll(self, message, args):
+		"""Closes a poll
+
+		Args:
+			message: Message object
+			args: Message content split by whitespace
+		"""
 		if len(args) < 3:
 			await self.reply(message, "Invalid request", reply=True)
 			return
@@ -92,6 +104,12 @@ class Janus(CelestialBot):
 		await self.reply(message, embed=results, reply=True)
 
 	async def voteOnPoll(self, message, args):
+		"""Records a vote on a given poll
+
+		Args:
+			message: Message object
+			args: Message content split by whitespace
+		"""
 		if len(args) < 4:
 			await self.reply(message, "Invalid vote", reply=True)
 			return
@@ -105,6 +123,12 @@ class Janus(CelestialBot):
 			await self.reply(message, "Available options are: {0}".format(str(self.polls[pollname]["choices"])), reply=True)
 
 	async def chooseFromList(self, message, args):
+		"""Chooses and replies with a random item from a list in the incoming message
+
+		Args:
+			message: Message object
+			args: Message content split by whitespace
+		"""
 		if len(args) < 4:
 			await self.reply(message, "Need at least 2 items to choose from", reply=True)
 			return
@@ -112,6 +136,12 @@ class Janus(CelestialBot):
 		await self.reply(message, options[randint(0, len(options) - 1)], reply=True)
 
 	async def listPolls(self, message, args):
+		"""Lists all running polls
+
+		Args:
+			message: Message object
+			args: Message content split by whitespace
+		"""
 		list = "Polls in progress:\n"
 		for pollname, poll in self.polls.items():
 			list += "{0} ({1})\n".format(pollname, poll["choices"])

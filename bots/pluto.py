@@ -37,9 +37,20 @@ class Pluto(CelestialBot):
 		self.defaultCmd = self.getQ
 
 	async def getQ(self, message, args):
+		"""Replies with a random CAH question
+
+		Args:
+			message: Message object
+			args: Message content split by whitespace
+		"""
 		await self.reply(message, self.getRandomQuestion(), reply=True)
 
 	def getRandomQuestion(self):
+		"""Gets a random CAH question
+
+		Return:
+			Random question from the CAH file
+		"""
 		return re.sub("([\*_])", r"\\\1", self.allQuestions[randint(0, self.qCount)])
 
 if __name__ == "__main__":

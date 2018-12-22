@@ -34,6 +34,12 @@ class Deimos(CelestialBot):
 		self.about = "I'm Deimos, named after the smaller and outermost of Mars' two moons. I execute Vongsprache scripts."
 
 	async def handle(self, message, args):
+		"""Default message handler to evaluate scripts
+
+		Args:
+			message: Message object
+			args: Message content split by whitespace
+		"""
 		if self.wasAddressed(message):
 			try:
 				data = {}
@@ -46,6 +52,14 @@ class Deimos(CelestialBot):
 				await self.reply(message, "Malformed request. Exception:\n{0}".format(str(e)))
 
 	def evaluate(self, data):
+		"""Evaluates a Vongsprache script
+
+		Args:
+			data: Dictionary containing the script and desired standard input
+
+		Return:
+			Script evaluation output
+		"""
 		self.runningScripts += 1
 		sNum = self.runningScripts
 		sFile = "script{0}".format(sNum)
