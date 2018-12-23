@@ -56,6 +56,10 @@ Iapetus
 - Named after one of Saturn's moons
 - Provides a countdown service by determining the number of days to a given date
 
+Hyperion
+- Named after one of Saturn's moons
+- Converts between Morse code and normal text
+
 ## System Requirements:
 
 Python 3.4 or later. See the requirements for [the Discord API](https://github.com/Rapptz/discord.py) and the [MTG SDK](https://github.com/MagicTheGathering/mtg-sdk-python) for more details on required Python packages.

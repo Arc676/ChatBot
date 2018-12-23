@@ -22,17 +22,21 @@
 
 from bot import CelestialBot
 import asyncio
-import discord
 import subprocess
 import re
 
 class Hyperion(CelestialBot):
 	def __init__(self):
 		super().__init__("Hyperion", color=0xD58F42)
+		self.buildHelp({
+			"morse [message]" : "Converts a message from normal text to Morse code",
+			"text [message]" : "Converts a message from Morse code to normal text"
+		})
 		self.commands.update({
 			"morse" : self.textToMorse,
 			"text" : self.morseToText
 		})
+		self.about = "I'm named after Hyperion, one of Saturn's moons (also known as Saturn VII) and also the Titan god of watchfulness and observation. I can encode and decode Morse code messages!"
 
 	def convert(self, msg, toMorse):
 		ret = ""
