@@ -1,6 +1,6 @@
 # MIT License
 
-# Copyright (c) 2017-8 Matthew Chen, Arc676/Alessandro Vinciguerra
+# Copyright (c) 2017-9 Matthew Chen, Arc676/Alessandro Vinciguerra
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -35,7 +35,7 @@ class Io(CelestialBot):
 		("where [ia][sr]e? .+\\?", "Somewhere, over the rainbow"),
 		("what is .+", "42"),
 		("Why did the chicken cross the road\?", "To get to the other side"),
-		("LICENSE", "MIT License at https:# github.com/Arc676/Discord-Bots"),
+		("LICENSE", "MIT License at https://github.com/Arc676/Discord-Bots"),
 		("Watcha doin\\?", "Eatin' chocolate"),
 		("Whered'ya get it\\?", "A dog dropped it!"),
 		("This isn't your average, everyday (.+)", "This is **ADVANCED** $"),
