@@ -32,7 +32,7 @@ class Iapetus(CelestialBot):
 		self.handleEverything = True
 		self.defaultCmd = self.checkReminder
 		self.buildHelp({
-			"add Event Name YYYY-MM-DD" : "Adds a new countdown with the given name and date to your list",
+			"add Event Name YYYY-MM-DD" : "Adds a new countdown with the given name and date to your list. If you already have a countdown with the same name, the date will be updated to the given date.",
 			"delete Event Name" : "Deletes all events with the given name from your countdowns",
 			"delay Days" : "Sets the number of days between automatic reminders; default is daily (1); you'll always be reminded if you send a message on the day of an event",
 			"list" : "Lists all your countdowns"
@@ -90,7 +90,7 @@ class Iapetus(CelestialBot):
 					await self.listCountdowns(message, args)
 
 	async def addCountdown(self, message, args):
-		"""Adds a countdown to the database
+		"""Adds a countdown to the database or changes the date on an existing countdown
 
 		Args:
 			message: Message object
@@ -108,14 +108,19 @@ class Iapetus(CelestialBot):
 			elif remaining < 0:
 				await self.reply(message, "{0} was {1} day(s) ago.".format(name, -remaining), reply=True)
 			else:
-				self.dbc.execute("INSERT INTO dates VALUES (?, ?, ?)", (name, date, message.author.id))
+				verb = "Added"
+				if self.dbc.execute("SELECT * FROM dates WHERE owner=? AND name=?", (message.author.id, name)).fetchone() is None:
+					self.dbc.execute("INSERT INTO dates VALUES (?, ?, ?)", (name, date, message.author.id))
+				else:
+					self.dbc.execute("UPDATE dates SET date=? WHERE owner=? AND name=?", (date, message.author.id, name))
+					verb = "Updated"
 
 				# check if user has an entry in lastReminder
 				if self.dbc.execute("SELECT * FROM lastReminder WHERE owner=?", (message.author.id,)).fetchone() is None:
 					today = datetime.date.today().isoformat()
 					self.dbc.execute("INSERT INTO lastReminder VALUES (?, ?, 0)", (message.author.id, today))
 
-				await self.reply(message, "Added countdown for {0}. Only {1} day(s) to go!".format(name, self.daysUntil(ddate)), reply=True)
+				await self.reply(message, "{0} countdown for {1}. Only {2} day(s) to go!".format(verb, name, remaining), reply=True)
 		except Exception as e:
 			await self.reply(message, "Something went wrong parsing your request: ```{0}```".format(str(e)), reply=True)
 		self.db.commit()
@@ -171,7 +176,7 @@ class Iapetus(CelestialBot):
 				past += "{0} was {1} day(s) ago. ".format(name, -remaining)
 				pastEvents.append(data)
 			else:
-				resp.add_field(name=name, value="{0} day(s) to go!".format(remaining), inline=False)
+				resp.add_field(name="{0} ({1})".format(name, data[1]), value="{0} day(s) to go!".format(remaining), inline=False)
 
 		if len(today) > 0:
 			desc = "{0} {1} today! ".format(
@@ -191,7 +196,7 @@ class Iapetus(CelestialBot):
 		if toDelete > 0:
 			for eventData in pastEvents:
 				self.dbc.execute("DELETE FROM dates WHERE name=? AND date=? AND owner=?", eventData)
-			await self.reply(message, "Deleted {0} events that are either today or in the past".format(toDelete), reply=True)
+			await self.reply(message, "Deleted {0} event(s) that are either today or in the past".format(toDelete), reply=True)
 
 	def updateUserReminderDate(self, user):
 		"""Sets the current date as the last time a given user was reminded of their countdowns

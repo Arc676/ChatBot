@@ -56,8 +56,9 @@ Queries are of the form 'property=value' e.g. 'name=Arc+Lightning'. Available pr
 		if card.image_url is not None:
 			resp.set_thumbnail(url=card.image_url)
 		resp.add_field(name="Mana Cost", value=card.mana_cost, inline=False)
-		if card.supertypes is not None:
+		if len(card.supertypes) > 0:
 			resp.add_field(name="Supertypes", value=", ".join(card.supertypes), inline=False)
+		if len(card.subtypes) > 0:
 			resp.add_field(name="Subtypes", value=", ".join(card.subtypes), inline=False)
 		resp.add_field(name="Oracle Text", value=card.text, inline=False)
 		if card.power is not None:

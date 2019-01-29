@@ -58,6 +58,7 @@ class CelestialBot(discord.Client):
 		self.handleEverything = False
 		self.commands = {
 			"die" : self.killBot,
+			"thanks" : self.youreWelcome,
 			"help" : self.showHelp,
 			"about" : self.showAbout
 		}
@@ -70,6 +71,15 @@ class CelestialBot(discord.Client):
 			args: Content of the message split by whitespace
 		"""
 		await self.reply(message, embed=self.help)
+
+	async def youreWelcome(self, message, args):
+		"""Replies with 'You're welcome'
+
+		Args:
+			message: Message to which to reply
+			args: Content of the message split by whitespace
+		"""
+		await self.reply(message, "You're welcome!", reply=True)
 
 	async def showAbout(self, message, args):
 		"""Replies to a given message with the about message for this bot
