@@ -21,6 +21,7 @@
 # SOFTWARE.
 
 from bot import CelestialBot
+import ctypes
 import asyncio
 import subprocess
 import re
@@ -38,26 +39,46 @@ class Hyperion(CelestialBot):
 		})
 		self.about = "I'm named after Hyperion, one of Saturn's moons (also known as Saturn VII) and also the Titan god of watchfulness and observation. I can encode and decode Morse code messages!"
 
-	def convert(self, msg, toMorse):
-		ret = ""
-		flag = "-t"
-		if not toMorse:
-			if re.search("[^.\- ]", msg):
-				return "Invalid characters in input"
-			flag = "-m"
-		try:
-			ret = subprocess.check_output(["./morse", flag,  msg], stderr=subprocess.PIPE).decode("utf-8")
-		except subprocess.CalledProcessError as e:
-			ret = "Err {0}: {1}".format(e.returncode, e.stderr.decode("utf-8"))
-		return "```{0}```".format(ret)
+		# Morse library
+		self.morseLib = ctypes.cdll.LoadLibrary("./libmorse.so")
+		self.morseLib.textToMorse.argtypes = (ctypes.c_char_p, ctypes.c_int)
+		self.morseLib.textToMorse.restype = ctypes.c_char_p
+		self.morseLib.morseToText.argtypes = (ctypes.c_char_p, ctypes.c_int)
+		self.morseLib.morseToText.restype = ctypes.c_char_p
+
+		# Standard library for deallocating memory
+		self.libc = ctypes.CDLL("libc.dylib")
+		self.libc.free.argtypes = (ctypes.c_char_p,)
+
+	def toMorse(self, msg):
+		if re.search("[^a-zA-Z ]", msg):
+			return "Invalid characters in input"
+		msglen = len(msg)
+		cinput = ctypes.c_char_p(msg.encode())
+		coutput = self.morseLib.textToMorse(cinput, msglen)
+		output = coutput.decode()
+		#self.libc.free(cinput)
+		#self.libc.free(coutput)
+		return output
+
+	def toText(self, msg):
+		if re.search("[^.\- ]", msg):
+			return "Invalid characters in input"
+		msglen = len(msg)
+		cinput = ctypes.c_char_p(msg.encode())
+		coutput = self.morseLib.morseToText(cinput, msglen)
+		output = coutput.decode()
+		#self.libc.free(cinput)
+		#self.libc.free(coutput)
+		return output
 
 	async def textToMorse(self, message, args):
 		msg = " ".join(args[2:])
-		await self.reply(message, self.convert(msg, True), reply=True)
+		await self.reply(message, self.toMorse(msg), reply=True)
 
 	async def morseToText(self, message, args):
 		msg = " ".join(args[2:])
-		await self.reply(message, self.convert(msg, False), reply=True)
+		await self.reply(message, self.toText(msg), reply=True)
 
 if __name__ == "__main__":
 	bot = Hyperion()

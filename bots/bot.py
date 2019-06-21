@@ -160,7 +160,7 @@ class CelestialBot(discord.Client):
 			embed: The embed object to include in the reply (defaults to None)
 			reply: Whether the reply should ping the author of the orginal message (defaults to False)
 		"""
-		await self.send_message(msgObj.channel, "{0} {1}".format(msgObj.author.mention if reply else "", msg).strip(), embed=embed)
+		await msgObj.channel.send("{0} {1}".format(msgObj.author.mention if reply else "", msg).strip(), embed=embed)
 
 	async def on_ready(self):
 		"""After login
