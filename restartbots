@@ -21,11 +21,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-if [ $# -lt 1 ]; then
-	echo Usage: startbot bot_name [bot_name ...]
-	exit 1
-fi
-for bot in "$@"; do
-	echo Waking $bot
-	python3 bots/$bot.py > logs/$bot.log 2>&1 & disown
+for bot in `ls bots/*.py`; do
+	if [ "$bot" == "bots/bot.py" ]; then
+		continue
+	fi
+	botname=`basename $bot .py`
+	pgrep -af $bot || ./startbot $botname
 done
