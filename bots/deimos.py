@@ -1,6 +1,6 @@
 # MIT License
 
-# Copyright (c) 2018-9 Arc676/Alessandro Vinciguerra
+# Copyright (c) 2018-21 Arc676/Alessandro Vinciguerra
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -30,8 +30,8 @@ class Deimos(CelestialBot):
 		super().__init__("Deimos", color=0xFFFF00)
 		self.runningScripts = 0
 		self.defaultCmd = self.handle
-		self.help.description = "To run a script, the message must start with \"deimos\" and contain two code blocks with no language. The first code block should contain the script and the second the contents to be passed to `stdin`."
-		self.about = "I'm Deimos, named after the smaller and outermost of Mars' two moons. I execute Vongsprache scripts."
+		self.help.description = "To run a script, the message must start with \"deimos\" and contain two code blocks; the first block should have `vongsprache` or `apl` as the language. The latter should have no language. The first code block should contain the script and the second the contents to be passed to `stdin`. If the latter block is omitted, no input will be passed to the script."
+		self.about = "I'm Deimos, named after the smaller and outermost of Mars' two moons. I execute Vongsprache and APL scripts."
 
 	async def handle(self, message, args):
 		"""Default message handler to evaluate scripts
@@ -44,15 +44,18 @@ class Deimos(CelestialBot):
 			try:
 				data = {}
 				blocks = message.content.split("```")
-				data["script"] = blocks[1].strip()
-				data["input"] = blocks[3].strip() + "\n"
-				resp = self.evaluate(data)
+				language, data["script"] = blocks[1].encode("utf-8").strip().decode("utf-8").split("\n", 1)
+				if len(blocks) > 3:
+					data["input"] = blocks[3].strip() + "\n"
+				else:
+					data["input"] = ""
+				resp = self.evaluate(data, language)
 				await self.reply(message, "```{0}```".format(resp))
 			except Exception as e:
 				await self.reply(message, "Malformed request. Exception:\n{0}".format(str(e)))
 
-	def evaluate(self, data):
-		"""Evaluates a Vongsprache script
+	def evaluate(self, data, language):
+		"""Evaluates a Vongsprache script or APL code
 
 		Args:
 			data: Dictionary containing the script and desired standard input
@@ -60,13 +63,15 @@ class Deimos(CelestialBot):
 		Return:
 			Script evaluation output
 		"""
+		if language.lower() not in ["vongsprache", "apl"]:
+			raise Exception(f"Unknown language {language}. Expected vongsprache or apl.")
 		self.runningScripts += 1
 		sNum = self.runningScripts
 		sFile = "script{0}".format(sNum)
 		iFile = "input{0}".format(sNum)
 
-		fds = open(sFile, "w")
-		fds.write(data["script"])
+		fds = open(sFile, "wb")
+		fds.write(data["script"].encode("utf-8"))
 		fds.close()
 
 		fdi = open(iFile, "w")
@@ -76,7 +81,9 @@ class Deimos(CelestialBot):
 		ret = ""
 		try:
 			fdi = open(iFile, "r")
-			ret = subprocess.check_output(["./vongsprache", sFile], stderr=subprocess.PIPE, stdin=fdi).decode("utf-8")
+			cmd = ["./vongsprache"] if language == "vongsprache" else ["apl", "--script", "--OFF", "-f"]
+			cmd.append(sFile)
+			ret = subprocess.check_output(cmd, stderr=subprocess.PIPE, stdin=fdi).decode("utf-8")
 		except subprocess.CalledProcessError as e:
 			ret = "Err {0}: {1}".format(e.returncode, e.stderr.decode("utf-8"))
 		finally:

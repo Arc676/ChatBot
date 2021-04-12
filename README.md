@@ -40,7 +40,8 @@ Charon
 Deimos
 - Named after one of Mars' moons
 - Reads [Vongsprache](https://github.com/Arc676/Vongsprache) scripts, evaluates them, and replies with the output
-- Requires a `vongsprache` executable in the project root
+- Also reads APL programs and evalutes them using GNU APL
+- Requires a `vongsprache` executable in the project root and GNU APL to be installed and accessible via `apl`
 - Requests should contain two code blocks, the first of which contains the script and the second of which contains any user input to be passed to the script
 
 Prometheus
